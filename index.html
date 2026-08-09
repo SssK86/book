@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <title>わたしの本棚</title>
 
+  <!-- Supabase JavaScript SDK -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
@@ -19,15 +21,14 @@
       --sub-text: #7a6f67;
       --accent: #7b4f34;
       --accent-dark: #5f3b27;
-      --wood: #8a5a3b;
       --wood-dark: #62402c;
       --border: #ded2c5;
-      --danger: #b84c4c;
       --shadow: 0 6px 18px rgba(66, 45, 30, 0.12);
     }
 
     body {
       margin: 0;
+
       font-family:
         -apple-system,
         BlinkMacSystemFont,
@@ -35,9 +36,15 @@
         "Hiragino Kaku Gothic ProN",
         "Yu Gothic",
         sans-serif;
+
       background:
-        radial-gradient(circle at top, #fffaf2 0, transparent 420px),
+        radial-gradient(
+          circle at top,
+          #fffaf2 0,
+          transparent 420px
+        ),
         var(--bg);
+
       color: var(--text);
     }
 
@@ -69,23 +76,35 @@
 
     .app-title {
       margin: 0;
+
       font-size: clamp(30px, 5vw, 48px);
+
       letter-spacing: 0.08em;
-      font-family: Georgia, "Yu Mincho", "Hiragino Mincho ProN", serif;
+
+      font-family:
+        Georgia,
+        "Yu Mincho",
+        "Hiragino Mincho ProN",
+        serif;
     }
 
     .app-subtitle {
-      margin: 10px 0 0;
+      margin-top: 10px;
       color: var(--sub-text);
       font-size: 14px;
     }
 
     .panel {
       background: rgba(255, 253, 248, 0.94);
+
       border: 1px solid var(--border);
+
       border-radius: 18px;
+
       box-shadow: var(--shadow);
+
       padding: 22px;
+
       margin-bottom: 24px;
     }
 
@@ -94,17 +113,46 @@
       font-size: 20px;
     }
 
+    /* ==============================
+       ログイン
+    ============================== */
+
     .login-container {
-      max-width: 450px;
-      margin: 50px auto;
+      max-width: 460px;
+      margin: 70px auto;
     }
 
     .login-description {
       color: var(--sub-text);
       font-size: 14px;
-      margin-bottom: 20px;
       line-height: 1.7;
+      margin-bottom: 22px;
     }
+
+    .login-step-title {
+      margin-bottom: 8px;
+      font-weight: bold;
+    }
+
+    .login-hint {
+      color: var(--sub-text);
+      font-size: 13px;
+      line-height: 1.6;
+      margin-bottom: 15px;
+    }
+
+    .login-link {
+      color: var(--accent);
+      text-decoration: underline;
+      cursor: pointer;
+      font-size: 13px;
+      margin-top: 15px;
+      display: inline-block;
+    }
+
+    /* ==============================
+       フォーム
+    ============================== */
 
     .form-grid {
       display: grid;
@@ -123,6 +171,7 @@
     label {
       display: block;
       margin-bottom: 7px;
+
       font-size: 14px;
       font-weight: 700;
     }
@@ -131,20 +180,27 @@
     select,
     textarea {
       width: 100%;
+
       border: 1px solid var(--border);
+
       border-radius: 10px;
+
       background: #fff;
+
       color: var(--text);
+
       padding: 11px 12px;
+
       outline: none;
-      transition: 0.2s;
     }
 
     input:focus,
     select:focus,
     textarea:focus {
       border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(123, 79, 52, 0.1);
+
+      box-shadow:
+        0 0 0 3px rgba(123, 79, 52, 0.1);
     }
 
     textarea {
@@ -154,9 +210,59 @@
 
     .counter {
       margin-top: 5px;
+
       text-align: right;
+
       color: var(--sub-text);
+
       font-size: 12px;
+    }
+
+    /* ==============================
+       ボタン
+    ============================== */
+
+    .primary-button,
+    .secondary-button,
+    .logout-button,
+    .edit-button,
+    .delete-button {
+      border: 0;
+
+      border-radius: 9px;
+
+      padding: 10px 16px;
+    }
+
+    .primary-button {
+      background: var(--accent);
+
+      color: white;
+
+      font-weight: bold;
+    }
+
+    .primary-button:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+
+    .login-button {
+      width: 100%;
+    }
+
+    .secondary-button {
+      display: none;
+
+      background: #ddd2c7;
+
+      color: var(--text);
+    }
+
+    .logout-button {
+      background: #ddd2c7;
+
+      color: var(--text);
     }
 
     .form-actions,
@@ -167,115 +273,153 @@
     }
 
     .header-actions {
-      justify-content: flex-end;
       margin-bottom: 16px;
-    }
-
-    .primary-button,
-    .secondary-button,
-    .edit-button,
-    .delete-button,
-    .logout-button {
-      border: 0;
-      border-radius: 9px;
-      padding: 10px 16px;
-      transition:
-        transform 0.15s,
-        opacity 0.15s;
-    }
-
-    .primary-button:hover,
-    .secondary-button:hover,
-    .edit-button:hover,
-    .delete-button:hover,
-    .logout-button:hover {
-      transform: translateY(-1px);
-    }
-
-    .primary-button {
-      background: var(--accent);
-      color: white;
-      font-weight: 700;
-    }
-
-    .secondary-button {
-      display: none;
-      background: #ddd2c7;
-      color: var(--text);
-    }
-
-    .logout-button {
-      background: #ddd2c7;
-      color: var(--text);
-    }
-
-    .login-button {
-      width: 100%;
-    }
-
-    .login-error,
-    .app-message {
-      margin-top: 12px;
-      padding: 10px 12px;
-      border-radius: 8px;
-      font-size: 13px;
-      display: none;
-    }
-
-    .login-error.error,
-    .app-message.error {
-      display: block;
-      background: #fbe6e6;
-      color: #872f2f;
-    }
-
-    .app-message.success {
-      display: block;
-      background: #e8f2e8;
-      color: #315f31;
     }
 
     .user-info {
       margin-right: auto;
+
       color: var(--sub-text);
+
       font-size: 13px;
     }
 
+    /* ==============================
+       メッセージ
+    ============================== */
+
+    .message {
+      margin-top: 14px;
+
+      padding: 11px 13px;
+
+      border-radius: 8px;
+
+      font-size: 13px;
+
+      display: none;
+
+      line-height: 1.6;
+    }
+
+    .message.error {
+      display: block;
+
+      background: #fbe6e6;
+
+      color: #872f2f;
+    }
+
+    .message.success {
+      display: block;
+
+      background: #e8f2e8;
+
+      color: #315f31;
+    }
+
+    /* ==============================
+       タブ
+    ============================== */
+
     .tabs {
       display: flex;
+
       gap: 8px;
+
       padding: 6px;
+
       border-radius: 14px;
+
       background: #e7ddd2;
+
       margin-bottom: 22px;
     }
 
     .tab-button {
       flex: 1;
-      border: 0;
+
+      border: none;
+
       background: transparent;
+
       color: var(--sub-text);
+
       border-radius: 10px;
+
       padding: 12px 14px;
-      font-weight: 700;
+
+      font-weight: bold;
     }
 
     .tab-button.active {
       background: var(--paper);
+
       color: var(--accent-dark);
-      box-shadow: 0 2px 8px rgba(58, 38, 24, 0.08);
+
+      box-shadow:
+        0 2px 8px rgba(58, 38, 24, 0.08);
     }
+
+    /* ==============================
+       集計
+    ============================== */
+
+    .summary {
+      display: flex;
+
+      gap: 12px;
+
+      flex-wrap: wrap;
+
+      margin-bottom: 16px;
+    }
+
+    .summary-card {
+      min-width: 150px;
+
+      padding: 13px 16px;
+
+      border: 1px solid var(--border);
+
+      background: rgba(255,255,255,0.65);
+
+      border-radius: 12px;
+    }
+
+    .summary-label {
+      color: var(--sub-text);
+
+      font-size: 12px;
+    }
+
+    .summary-number {
+      margin-top: 2px;
+
+      font-size: 24px;
+
+      font-weight: bold;
+    }
+
+    /* ==============================
+       ツールバー
+    ============================== */
 
     .toolbar {
       display: flex;
+
       justify-content: space-between;
+
       gap: 12px;
+
       align-items: center;
+
       margin-bottom: 18px;
     }
 
     .tab-description {
       color: var(--sub-text);
+
       font-size: 14px;
     }
 
@@ -283,64 +427,61 @@
       width: 160px;
     }
 
-    .summary {
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-      margin-bottom: 16px;
-    }
-
-    .summary-card {
-      min-width: 150px;
-      padding: 13px 16px;
-      border: 1px solid var(--border);
-      background: rgba(255, 255, 255, 0.65);
-      border-radius: 12px;
-    }
-
-    .summary-label {
-      color: var(--sub-text);
-      font-size: 12px;
-    }
-
-    .summary-number {
-      margin-top: 2px;
-      font-size: 24px;
-      font-weight: 700;
-    }
+    /* ==============================
+       本棚
+    ============================== */
 
     .bookshelf {
       position: relative;
+
       padding: 24px 22px 42px;
+
       border-radius: 14px;
+
       overflow: hidden;
+
       background:
         linear-gradient(
           90deg,
-          rgba(104, 67, 43, 0.08) 1px,
+          rgba(104,67,43,0.08) 1px,
           transparent 1px
         ),
-        linear-gradient(180deg, #d1a47d, #b67f58);
-      background-size: 40px 100%, 100% 100%;
-      border: 8px solid var(--wood-dark);
+        linear-gradient(
+          180deg,
+          #d1a47d,
+          #b67f58
+        );
+
+      background-size:
+        40px 100%,
+        100% 100%;
+
+      border:
+        8px solid var(--wood-dark);
+
       box-shadow:
-        inset 0 0 20px rgba(68, 38, 20, 0.22),
-        0 8px 18px rgba(61, 39, 26, 0.14);
+        inset 0 0 20px rgba(68,38,20,0.22),
+        0 8px 18px rgba(61,39,26,0.14);
     }
 
     .bookshelf::before,
     .bookshelf::after {
       content: "";
+
       position: absolute;
+
       left: 0;
+
       width: 100%;
+
       height: 16px;
-      background: linear-gradient(
-        180deg,
-        #9d6846,
-        var(--wood-dark)
-      );
-      box-shadow: 0 3px 7px rgba(38, 25, 17, 0.25);
+
+      background:
+        linear-gradient(
+          180deg,
+          #9d6846,
+          var(--wood-dark)
+        );
     }
 
     .bookshelf::before {
@@ -353,33 +494,38 @@
 
     .book-grid {
       min-height: 220px;
+
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+
+      grid-template-columns:
+        repeat(
+          auto-fill,
+          minmax(130px, 1fr)
+        );
+
       gap: 28px 18px;
+
       align-items: end;
     }
 
     .book {
-      position: relative;
       min-height: 210px;
-      border-radius: 5px 9px 9px 5px;
-      padding: 17px 12px 14px;
-      color: white;
-      box-shadow:
-        4px 5px 9px rgba(49, 31, 19, 0.32),
-        inset -5px 0 0 rgba(0, 0, 0, 0.08),
-        inset 4px 0 0 rgba(255, 255, 255, 0.08);
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      transition:
-        transform 0.18s ease,
-        box-shadow 0.18s ease;
-      overflow: hidden;
-    }
 
-    .book:hover {
-      transform: translateY(-7px) rotate(-0.7deg);
+      padding: 17px 12px 14px;
+
+      border-radius: 5px 9px 9px 5px;
+
+      color: white;
+
+      display: flex;
+
+      flex-direction: column;
+
+      justify-content: space-between;
+
+      box-shadow:
+        4px 5px 9px rgba(49,31,19,0.32),
+        inset -5px 0 0 rgba(0,0,0,0.08);
     }
 
     .book:nth-child(6n + 1) {
@@ -406,200 +552,269 @@
       background: #4f6175;
     }
 
-    .book::before {
-      content: "";
-      position: absolute;
-      left: 7px;
-      top: 0;
-      bottom: 0;
-      width: 2px;
-      background: rgba(255, 255, 255, 0.16);
+    .book-title {
+      font-family:
+        Georgia,
+        "Yu Mincho",
+        serif;
+
+      font-weight: bold;
+
+      line-height: 1.45;
+
+      word-break: break-word;
     }
 
-    .book-title {
-      position: relative;
-      z-index: 1;
-      font-family: Georgia, "Yu Mincho", serif;
-      font-weight: 700;
-      line-height: 1.45;
-      font-size: 15px;
-      word-break: break-word;
+    .book-status-label,
+    .book-dates,
+    .book-note {
+      font-size: 11px;
     }
 
     .book-status-label {
       margin-top: 12px;
-      font-size: 11px;
+
       opacity: 0.8;
     }
 
     .book-dates {
       margin-top: 12px;
-      font-size: 11px;
-      line-height: 1.55;
-      opacity: 0.9;
+
+      line-height: 1.6;
     }
 
     .book-note {
       margin-top: 10px;
-      font-size: 11px;
-      line-height: 1.5;
-      border-top: 1px solid rgba(255,255,255,0.18);
+
+      border-top:
+        1px solid rgba(255,255,255,0.18);
+
       padding-top: 8px;
-      word-break: break-word;
+
+      line-height: 1.5;
     }
 
     .book-actions {
       display: flex;
+
       gap: 6px;
+
       margin-top: 13px;
     }
 
     .edit-button,
     .delete-button {
       flex: 1;
+
       padding: 7px 5px;
+
       font-size: 11px;
     }
 
     .edit-button {
-      background: rgba(255, 255, 255, 0.88);
+      background:
+        rgba(255,255,255,0.88);
+
       color: #40352e;
     }
 
     .delete-button {
-      background: rgba(78, 21, 21, 0.72);
+      background:
+        rgba(78,21,21,0.72);
+
       color: white;
     }
 
     .empty-state,
     .loading-state {
       grid-column: 1 / -1;
+
       min-height: 180px;
+
       display: flex;
-      flex-direction: column;
+
       justify-content: center;
+
       align-items: center;
+
       text-align: center;
+
       color: #5c4636;
-      background: rgba(255, 248, 237, 0.38);
-      border: 1px dashed rgba(92, 70, 54, 0.35);
+
+      background:
+        rgba(255,248,237,0.38);
+
+      border:
+        1px dashed rgba(92,70,54,0.35);
+
       border-radius: 10px;
     }
 
-    .empty-icon {
-      font-size: 42px;
-      margin-bottom: 8px;
-    }
-
     @media (max-width: 720px) {
+
       .container {
-        width: min(100% - 20px, 1100px);
-        padding-top: 22px;
+        width: calc(100% - 20px);
       }
 
       .form-grid {
         grid-template-columns: 1fr;
-        gap: 0;
       }
 
       .form-group.full {
         grid-column: auto;
       }
 
+      .book-grid {
+        grid-template-columns:
+          repeat(2, minmax(0,1fr));
+      }
+
       .toolbar {
-        align-items: stretch;
         flex-direction: column;
+        align-items: stretch;
       }
 
       .year-filter {
         width: 100%;
       }
 
-      .book-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 22px 12px;
-      }
-
-      .book {
-        min-height: 195px;
-      }
-
-      .bookshelf {
-        padding-left: 14px;
-        padding-right: 14px;
-      }
-
-      .header-actions {
-        flex-wrap: wrap;
-      }
-
-      .user-info {
-        width: 100%;
-      }
     }
+
   </style>
 </head>
 
+
 <body>
 
-  <!-- ログイン画面 -->
-  <section id="loginScreen" class="login-container panel">
+  <!-- ==========================================
+       ログイン画面
+  =========================================== -->
+
+  <section
+    id="loginScreen"
+    class="login-container panel"
+  >
 
     <h1 class="panel-title">
       わたしの本棚
     </h1>
 
-    <p class="login-description">
-      Supabaseに登録したメールアドレスとパスワードでログインしてください。
-    </p>
+    <!-- メールアドレス入力 -->
 
-    <form id="loginForm">
+    <div id="emailStep">
 
-      <div class="form-group">
-        <label for="loginEmail">
-          メールアドレス
-        </label>
+      <p class="login-description">
+        パスワードは不要です。<br>
+        登録済みのメールアドレスにログイン用メールを送信します。
+      </p>
 
-        <input
-          type="email"
-          id="loginEmail"
-          autocomplete="email"
-          required
-        />
+      <form id="emailForm">
+
+        <div class="form-group">
+
+          <label for="loginEmail">
+            メールアドレス
+          </label>
+
+          <input
+            type="email"
+            id="loginEmail"
+            autocomplete="email"
+            required
+          >
+
+        </div>
+
+        <button
+          type="submit"
+          id="sendButton"
+          class="primary-button login-button"
+        >
+          ログインメールを送る
+        </button>
+
+      </form>
+
+    </div>
+
+
+    <!-- OTPコード入力 -->
+
+    <div
+      id="otpStep"
+      class="hidden"
+    >
+
+      <div class="login-step-title">
+        メールを確認してください
       </div>
 
-      <div class="form-group">
-        <label for="loginPassword">
-          パスワード
-        </label>
+      <p class="login-hint">
+        メールに認証コードが記載されている場合は、
+        そのコードを入力してください。
+        <br><br>
+        マジックリンクが届いた場合は、
+        メール内のリンクをクリックするだけでログインできます。
+      </p>
 
-        <input
-          type="password"
-          id="loginPassword"
-          autocomplete="current-password"
-          required
-        />
-      </div>
+      <form id="otpForm">
 
-      <button
-        type="submit"
-        class="primary-button login-button"
-        id="loginButton"
+        <div class="form-group">
+
+          <label for="otpCode">
+            認証コード
+          </label>
+
+          <input
+            type="text"
+            id="otpCode"
+            inputmode="numeric"
+            autocomplete="one-time-code"
+            placeholder="認証コード"
+          >
+
+        </div>
+
+        <button
+          type="submit"
+          id="verifyButton"
+          class="primary-button login-button"
+        >
+          認証コードでログイン
+        </button>
+
+      </form>
+
+      <span
+        id="resendButton"
+        class="login-link"
       >
-        ログイン
-      </button>
+        メールを再送する
+      </span>
 
-      <div
-        id="loginError"
-        class="login-error"
-      ></div>
+      <br>
 
-    </form>
+      <span
+        id="changeEmailButton"
+        class="login-link"
+      >
+        メールアドレスを変更
+      </span>
+
+    </div>
+
+    <div
+      id="loginMessage"
+      class="message"
+    ></div>
 
   </section>
 
 
-  <!-- アプリ本体 -->
+  <!-- ==========================================
+       アプリ本体
+  =========================================== -->
+
   <main
     id="appScreen"
     class="container hidden"
@@ -617,6 +832,7 @@
 
     </header>
 
+
     <div class="header-actions">
 
       <div
@@ -625,7 +841,6 @@
       ></div>
 
       <button
-        type="button"
         id="logoutButton"
         class="logout-button"
       >
@@ -634,16 +849,20 @@
 
     </div>
 
+
     <div
       id="appMessage"
-      class="app-message"
+      class="message"
     ></div>
+
+
+    <!-- 本登録 -->
 
     <section class="panel">
 
       <h2
-        class="panel-title"
         id="formTitle"
+        class="panel-title"
       >
         本を登録
       </h2>
@@ -653,7 +872,7 @@
         <input
           type="hidden"
           id="editId"
-        />
+        >
 
         <div class="form-grid">
 
@@ -666,11 +885,11 @@
             <input
               type="text"
               id="title"
-              placeholder="例：吾輩は猫である"
               required
-            />
+            >
 
           </div>
+
 
           <div class="form-group">
 
@@ -692,6 +911,7 @@
 
           </div>
 
+
           <div class="form-group">
 
             <label for="startDate">
@@ -701,9 +921,10 @@
             <input
               type="date"
               id="startDate"
-            />
+            >
 
           </div>
+
 
           <div class="form-group">
 
@@ -714,9 +935,10 @@
             <input
               type="date"
               id="endDate"
-            />
+            >
 
           </div>
+
 
           <div class="form-group full">
 
@@ -727,7 +949,6 @@
             <textarea
               id="note"
               maxlength="100"
-              placeholder="本の感想やメモを入力"
             ></textarea>
 
             <div class="counter">
@@ -739,20 +960,21 @@
 
         </div>
 
+
         <div class="form-actions">
 
           <button
             type="submit"
-            class="primary-button"
             id="saveButton"
+            class="primary-button"
           >
             本棚に追加
           </button>
 
           <button
             type="button"
-            class="secondary-button"
             id="cancelEditButton"
+            class="secondary-button"
           >
             編集をキャンセル
           </button>
@@ -763,12 +985,14 @@
 
     </section>
 
+
+    <!-- 本棚 -->
+
     <section class="panel">
 
       <div class="tabs">
 
         <button
-          type="button"
           class="tab-button active"
           data-tab="want"
         >
@@ -776,7 +1000,6 @@
         </button>
 
         <button
-          type="button"
           class="tab-button"
           data-tab="read"
         >
@@ -784,6 +1007,7 @@
         </button>
 
       </div>
+
 
       <div class="summary">
 
@@ -794,13 +1018,14 @@
           </div>
 
           <div
-            class="summary-number"
             id="wantCount"
+            class="summary-number"
           >
             0
           </div>
 
         </div>
+
 
         <div class="summary-card">
 
@@ -809,8 +1034,8 @@
           </div>
 
           <div
-            class="summary-number"
             id="readCount"
+            class="summary-number"
           >
             0
           </div>
@@ -819,11 +1044,12 @@
 
       </div>
 
+
       <div class="toolbar">
 
         <div
-          class="tab-description"
           id="tabDescription"
+          class="tab-description"
         >
           これから読みたい本を表示しています。
         </div>
@@ -832,18 +1058,21 @@
           id="yearFilter"
           class="year-filter hidden"
         >
+
           <option value="all">
             すべての年
           </option>
+
         </select>
 
       </div>
 
+
       <div class="bookshelf">
 
         <div
-          class="book-grid"
           id="bookList"
+          class="book-grid"
         ></div>
 
       </div>
@@ -852,14 +1081,17 @@
 
   </main>
 
-  <script>
 
-    /*
-    ==========================================================
-    ★★★ ここだけ自分のSupabase情報に変更してください ★★★
-    ==========================================================
-    */
+<script>
 
+/* =========================================================
+   Supabase設定
+   ========================================================= */
+
+/*
+  ↓↓↓ 必ず自分の値に変更してください ↓↓↓
+*/
+  
     const SUPABASE_URL =
       "https://iivycgqxkxkwtjwstgpl.supabase.co";
 
@@ -867,1289 +1099,1418 @@
       "sb_publishable_d8NnwWFU7eUlxpcL040qsg_SrCK2WWP";
 
 
-    /*
-    ==========================================================
-    Supabase初期化
-    ==========================================================
-    */
+const supabaseClient =
+  window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_PUBLISHABLE_KEY
+  );
 
-    const supabaseClient =
-      window.supabase.createClient(
-        SUPABASE_URL,
-        SUPABASE_PUBLISHABLE_KEY
-      );
 
+/* =========================================================
+   状態
+   ========================================================= */
 
-    /*
-    ==========================================================
-    DOM
-    ==========================================================
-    */
+let books = [];
 
-    const loginScreen =
-      document.getElementById("loginScreen");
+let currentUser = null;
 
-    const appScreen =
-      document.getElementById("appScreen");
+let currentTab = "want";
 
-    const loginForm =
-      document.getElementById("loginForm");
+let loginEmailAddress = "";
 
-    const loginEmail =
-      document.getElementById("loginEmail");
 
-    const loginPassword =
-      document.getElementById("loginPassword");
+/* =========================================================
+   DOM
+   ========================================================= */
 
-    const loginButton =
-      document.getElementById("loginButton");
+const loginScreen =
+  document.getElementById("loginScreen");
 
-    const loginError =
-      document.getElementById("loginError");
+const appScreen =
+  document.getElementById("appScreen");
 
-    const logoutButton =
-      document.getElementById("logoutButton");
+const emailStep =
+  document.getElementById("emailStep");
 
-    const userInfo =
-      document.getElementById("userInfo");
+const otpStep =
+  document.getElementById("otpStep");
 
-    const appMessage =
-      document.getElementById("appMessage");
+const emailForm =
+  document.getElementById("emailForm");
 
-    const bookForm =
-      document.getElementById("bookForm");
+const otpForm =
+  document.getElementById("otpForm");
 
-    const titleInput =
-      document.getElementById("title");
+const loginEmail =
+  document.getElementById("loginEmail");
 
-    const statusInput =
-      document.getElementById("status");
+const otpCode =
+  document.getElementById("otpCode");
 
-    const startDateInput =
-      document.getElementById("startDate");
+const sendButton =
+  document.getElementById("sendButton");
 
-    const endDateInput =
-      document.getElementById("endDate");
+const verifyButton =
+  document.getElementById("verifyButton");
 
-    const noteInput =
-      document.getElementById("note");
+const resendButton =
+  document.getElementById("resendButton");
 
-    const noteCount =
-      document.getElementById("noteCount");
+const changeEmailButton =
+  document.getElementById("changeEmailButton");
 
-    const editIdInput =
-      document.getElementById("editId");
+const loginMessage =
+  document.getElementById("loginMessage");
 
-    const bookList =
-      document.getElementById("bookList");
+const logoutButton =
+  document.getElementById("logoutButton");
 
-    const yearFilter =
-      document.getElementById("yearFilter");
+const userInfo =
+  document.getElementById("userInfo");
 
-    const tabButtons =
-      document.querySelectorAll(".tab-button");
+const bookForm =
+  document.getElementById("bookForm");
 
-    const tabDescription =
-      document.getElementById("tabDescription");
+const editIdInput =
+  document.getElementById("editId");
 
-    const wantCount =
-      document.getElementById("wantCount");
+const titleInput =
+  document.getElementById("title");
 
-    const readCount =
-      document.getElementById("readCount");
+const statusInput =
+  document.getElementById("status");
 
-    const saveButton =
-      document.getElementById("saveButton");
+const startDateInput =
+  document.getElementById("startDate");
 
-    const cancelEditButton =
-      document.getElementById(
-        "cancelEditButton"
-      );
+const endDateInput =
+  document.getElementById("endDate");
 
-    const formTitle =
-      document.getElementById("formTitle");
+const noteInput =
+  document.getElementById("note");
 
+const noteCount =
+  document.getElementById("noteCount");
 
-    /*
-    ==========================================================
-    状態
-    ==========================================================
-    */
+const saveButton =
+  document.getElementById("saveButton");
 
-    let books = [];
+const cancelEditButton =
+  document.getElementById("cancelEditButton");
 
-    let currentUser = null;
+const formTitle =
+  document.getElementById("formTitle");
 
-    let currentTab = "want";
+const bookList =
+  document.getElementById("bookList");
 
+const wantCount =
+  document.getElementById("wantCount");
 
-    /*
-    ==========================================================
-    初期化
-    ==========================================================
-    */
+const readCount =
+  document.getElementById("readCount");
 
-    initializeApp();
+const yearFilter =
+  document.getElementById("yearFilter");
 
+const tabDescription =
+  document.getElementById("tabDescription");
 
-    async function initializeApp() {
+const tabButtons =
+  document.querySelectorAll(".tab-button");
 
-      const {
-        data: { session },
-        error
-      } =
-        await supabaseClient.auth.getSession();
+const appMessage =
+  document.getElementById("appMessage");
 
-      if (error) {
 
-        console.error(error);
+/* =========================================================
+   初期起動
+   ========================================================= */
 
-        showLogin();
+initializeApp();
 
-        return;
-      }
 
-      if (session?.user) {
+async function initializeApp() {
 
-        await startApp(session.user);
+  const {
+    data: { session },
+    error
+  } =
+    await supabaseClient.auth.getSession();
 
-      } else {
 
-        showLogin();
+  if (error) {
 
-      }
+    console.error(error);
 
-    }
+    showLogin();
 
+    return;
 
-    /*
-    ==========================================================
-    ログイン
-    ==========================================================
-    */
+  }
 
-    loginForm.addEventListener(
-      "submit",
-      async (event) => {
 
-        event.preventDefault();
+  if (session?.user) {
 
-        clearLoginError();
+    await startApp(session.user);
 
-        loginButton.disabled = true;
+  } else {
 
-        loginButton.textContent =
-          "ログイン中...";
+    showLogin();
 
-        const email =
-          loginEmail.value.trim();
+  }
 
-        const password =
-          loginPassword.value;
+}
 
-        const {
-          data,
-          error
-        } =
-          await supabaseClient.auth
-            .signInWithPassword({
-              email,
-              password
-            });
 
-        loginButton.disabled = false;
+/* =========================================================
+   Auth状態変化
+   Magic Linkから戻ってきた場合もここで検知
+   ========================================================= */
 
-        loginButton.textContent =
-          "ログイン";
+supabaseClient.auth.onAuthStateChange(
+  async (event, session) => {
 
-        if (error) {
-
-          console.error(error);
-
-          showLoginError(
-            "ログインに失敗しました。メールアドレスまたはパスワードを確認してください。"
-          );
-
-          return;
-        }
-
-        if (data.user) {
-
-          loginForm.reset();
-
-          await startApp(data.user);
-
-        }
-
-      }
-    );
-
-
-    /*
-    ==========================================================
-    ログアウト
-    ==========================================================
-    */
-
-    logoutButton.addEventListener(
-      "click",
-      async () => {
-
-        const { error } =
-          await supabaseClient.auth
-            .signOut();
-
-        if (error) {
-
-          showAppMessage(
-            "ログアウトに失敗しました。",
-            "error"
-          );
-
-          return;
-        }
-
-        books = [];
-
-        currentUser = null;
-
-        resetForm();
-
-        showLogin();
-
-      }
-    );
-
-
-    /*
-    ==========================================================
-    アプリ開始
-    ==========================================================
-    */
-
-    async function startApp(user) {
-
-      currentUser = user;
-
-      loginScreen.classList.add(
-        "hidden"
-      );
-
-      appScreen.classList.remove(
-        "hidden"
-      );
-
-      userInfo.textContent =
-        user.email
-          ? `ログイン中：${user.email}`
-          : "ログイン中";
-
-      await loadBooks();
-
-    }
-
-
-    function showLogin() {
-
-      appScreen.classList.add(
-        "hidden"
-      );
-
-      loginScreen.classList.remove(
-        "hidden"
-      );
-
-    }
-
-
-    /*
-    ==========================================================
-    本一覧取得
-    ==========================================================
-    */
-
-    async function loadBooks() {
-
-      showLoading();
-
-      const {
-        data,
-        error
-      } =
-        await supabaseClient
-          .from("books")
-          .select("*")
-          .order(
-            "created_at",
-            {
-              ascending: false
-            }
-          );
-
-      if (error) {
-
-        console.error(error);
-
-        books = [];
-
-        renderBooks();
-
-        showAppMessage(
-          "本のデータ取得に失敗しました。SupabaseのRLS設定とテーブル構成を確認してください。",
-          "error"
-        );
-
-        return;
-      }
-
-      books = data || [];
-
-      updateYearFilter();
-
-      updateSummary();
-
-      updateTabs();
-
-      updateTabUI();
-
-      renderBooks();
-
-    }
-
-
-    /*
-    ==========================================================
-    本追加・編集
-    ==========================================================
-    */
-
-    bookForm.addEventListener(
-      "submit",
-      async (event) => {
-
-        event.preventDefault();
-
-        clearAppMessage();
-
-        if (!currentUser) {
-
-          showAppMessage(
-            "ログイン状態を確認してください。",
-            "error"
-          );
-
-          return;
-        }
-
-        const title =
-          titleInput.value.trim();
-
-        const status =
-          statusInput.value;
-
-        const startDate =
-          startDateInput.value;
-
-        const endDate =
-          endDateInput.value;
-
-        const note =
-          noteInput.value.trim();
-
-        const editId =
-          editIdInput.value;
-
-        if (!title) {
-
-          showAppMessage(
-            "本のタイトルを入力してください。",
-            "error"
-          );
-
-          return;
-        }
-
-        if (note.length > 100) {
-
-          showAppMessage(
-            "備考・感想は100文字以内で入力してください。",
-            "error"
-          );
-
-          return;
-        }
-
-        if (
-          startDate &&
-          endDate &&
-          startDate > endDate
-        ) {
-
-          showAppMessage(
-            "読書終了日は読書開始日以降の日付を指定してください。",
-            "error"
-          );
-
-          return;
-        }
-
-        if (
-          status === "read" &&
-          !endDate
-        ) {
-
-          const proceed =
-            confirm(
-              "読んだ本ですが、読書終了日が入力されていません。このまま保存しますか？"
-            );
-
-          if (!proceed) {
-            return;
-          }
-
-        }
-
-        saveButton.disabled = true;
-
-        saveButton.textContent =
-          editId
-            ? "保存中..."
-            : "追加中...";
-
-
-        if (editId) {
-
-          await updateBook(
-            editId,
-            {
-              title,
-              status,
-              start_date:
-                startDate || null,
-              end_date:
-                endDate || null,
-              note:
-                note || null
-            }
-          );
-
-        } else {
-
-          await insertBook({
-            user_id:
-              currentUser.id,
-
-            title,
-
-            status,
-
-            start_date:
-              startDate || null,
-
-            end_date:
-              endDate || null,
-
-            note:
-              note || null
-          });
-
-        }
-
-        saveButton.disabled = false;
-
-        saveButton.textContent =
-          "本棚に追加";
-
-      }
-    );
-
-
-    /*
-    ==========================================================
-    DB INSERT
-    ==========================================================
-    */
-
-    async function insertBook(bookData) {
-
-      const {
-        error
-      } =
-        await supabaseClient
-          .from("books")
-          .insert(bookData);
-
-      if (error) {
-
-        console.error(error);
-
-        showAppMessage(
-          "本の登録に失敗しました。",
-          "error"
-        );
-
-        return;
-      }
-
-      currentTab =
-        bookData.status;
-
-      resetForm();
-
-      await loadBooks();
-
-      showAppMessage(
-        "本を登録しました。",
-        "success"
-      );
-
-    }
-
-
-    /*
-    ==========================================================
-    DB UPDATE
-    ==========================================================
-    */
-
-    async function updateBook(
-      id,
-      bookData
+    if (
+      event === "SIGNED_IN" &&
+      session?.user
     ) {
 
-      const {
-        error
-      } =
-        await supabaseClient
-          .from("books")
-          .update(bookData)
-          .eq("id", id);
-
-      if (error) {
-
-        console.error(error);
-
-        showAppMessage(
-          "本の更新に失敗しました。",
-          "error"
-        );
-
-        return;
-      }
-
-      currentTab =
-        bookData.status;
-
-      resetForm();
-
-      await loadBooks();
-
-      showAppMessage(
-        "本を更新しました。",
-        "success"
+      await startApp(
+        session.user
       );
 
     }
 
 
-    /*
-    ==========================================================
-    DB DELETE
-    ==========================================================
-    */
+    if (
+      event === "SIGNED_OUT"
+    ) {
 
-    async function deleteBook(id) {
+      showLogin();
 
-      const book =
-        books.find(
-          (book) =>
-            String(book.id) ===
-            String(id)
-        );
+    }
 
-      if (!book) {
-        return;
-      }
+  }
+);
 
-      const confirmed =
-        confirm(
-          `「${book.title}」を削除しますか？`
-        );
 
-      if (!confirmed) {
-        return;
-      }
+/* =========================================================
+   ログインメール送信
+   ========================================================= */
 
-      const {
-        error
-      } =
-        await supabaseClient
-          .from("books")
-          .delete()
-          .eq("id", id);
+emailForm.addEventListener(
+  "submit",
+  async (event) => {
 
-      if (error) {
+    event.preventDefault();
 
-        console.error(error);
+    loginEmailAddress =
+      loginEmail.value.trim();
 
-        showAppMessage(
-          "削除に失敗しました。",
-          "error"
-        );
+    if (!loginEmailAddress) {
+      return;
+    }
 
-        return;
-      }
+    await sendLoginEmail();
 
-      if (
-        String(editIdInput.value) ===
-        String(id)
-      ) {
+  }
+);
 
-        resetForm();
 
-      }
+async function sendLoginEmail() {
 
-      await loadBooks();
+  clearLoginMessage();
 
-      showAppMessage(
-        "本を削除しました。",
-        "success"
+  sendButton.disabled = true;
+
+  sendButton.textContent =
+    "送信中...";
+
+
+  const {
+    error
+  } =
+    await supabaseClient.auth
+      .signInWithOtp({
+
+        email:
+          loginEmailAddress,
+
+        options: {
+
+          /*
+            既存ユーザーのみログイン可能。
+
+            存在しないメールアドレスで
+            新規ユーザーを自動作成しない。
+          */
+          shouldCreateUser: false,
+
+          /*
+            Magic Linkの場合の
+            ログイン後戻り先。
+
+            GitHub Pagesで現在開いている
+            index.htmlへ戻す。
+          */
+          emailRedirectTo:
+            window.location.origin +
+            window.location.pathname
+
+        }
+
+      });
+
+
+  sendButton.disabled = false;
+
+  sendButton.textContent =
+    "ログインメールを送る";
+
+
+  if (error) {
+
+    console.error(error);
+
+    showLoginMessage(
+      "ログインメールを送信できませんでした。登録済みのメールアドレスか確認してください。",
+      "error"
+    );
+
+    return;
+
+  }
+
+
+  emailStep.classList.add(
+    "hidden"
+  );
+
+  otpStep.classList.remove(
+    "hidden"
+  );
+
+
+  showLoginMessage(
+    "ログインメールを送信しました。メールをご確認ください。",
+    "success"
+  );
+
+}
+
+
+/* =========================================================
+   OTP認証
+   ========================================================= */
+
+otpForm.addEventListener(
+  "submit",
+  async (event) => {
+
+    event.preventDefault();
+
+
+    const token =
+      otpCode.value.trim();
+
+
+    if (!token) {
+
+      showLoginMessage(
+        "認証コードを入力してください。",
+        "error"
       );
+
+      return;
 
     }
 
 
-    /*
-    ==========================================================
-    編集
-    ==========================================================
-    */
+    verifyButton.disabled = true;
 
-    function editBook(id) {
+    verifyButton.textContent =
+      "確認中...";
 
-      const book =
-        books.find(
-          (book) =>
-            String(book.id) ===
-            String(id)
-        );
 
-      if (!book) {
-        return;
-      }
+    const {
+      data,
+      error
+    } =
+      await supabaseClient.auth
+        .verifyOtp({
 
-      editIdInput.value =
-        book.id;
+          email:
+            loginEmailAddress,
 
-      titleInput.value =
-        book.title || "";
+          token,
 
-      statusInput.value =
-        book.status || "want";
+          type: "email"
 
-      startDateInput.value =
-        book.start_date || "";
+        });
 
-      endDateInput.value =
-        book.end_date || "";
 
-      noteInput.value =
-        book.note || "";
+    verifyButton.disabled = false;
 
-      noteCount.textContent =
-        noteInput.value.length;
+    verifyButton.textContent =
+      "認証コードでログイン";
 
-      formTitle.textContent =
-        "本を編集";
 
-      saveButton.textContent =
-        "変更を保存";
+    if (error) {
 
-      cancelEditButton.style.display =
-        "inline-block";
+      console.error(error);
 
-      window.scrollTo({
-        top: 0,
-        behavior: "smooth"
+      showLoginMessage(
+        "認証コードが正しくないか、有効期限が切れています。",
+        "error"
+      );
+
+      return;
+
+    }
+
+
+    if (data.user) {
+
+      otpForm.reset();
+
+      await startApp(
+        data.user
+      );
+
+    }
+
+  }
+);
+
+
+/* =========================================================
+   再送
+   ========================================================= */
+
+resendButton.addEventListener(
+  "click",
+  async () => {
+
+    await sendLoginEmail();
+
+  }
+);
+
+
+/* =========================================================
+   メールアドレス変更
+   ========================================================= */
+
+changeEmailButton.addEventListener(
+  "click",
+  () => {
+
+    otpStep.classList.add(
+      "hidden"
+    );
+
+    emailStep.classList.remove(
+      "hidden"
+    );
+
+    otpForm.reset();
+
+    clearLoginMessage();
+
+  }
+);
+
+
+/* =========================================================
+   ログアウト
+   ========================================================= */
+
+logoutButton.addEventListener(
+  "click",
+  async () => {
+
+    const {
+      error
+    } =
+      await supabaseClient.auth
+        .signOut();
+
+
+    if (error) {
+
+      showAppMessage(
+        "ログアウトに失敗しました。",
+        "error"
+      );
+
+      return;
+
+    }
+
+
+    currentUser = null;
+
+    books = [];
+
+    resetForm();
+
+    showLogin();
+
+  }
+);
+
+
+/* =========================================================
+   アプリ開始
+   ========================================================= */
+
+async function startApp(user) {
+
+  currentUser = user;
+
+
+  loginScreen.classList.add(
+    "hidden"
+  );
+
+  appScreen.classList.remove(
+    "hidden"
+  );
+
+
+  userInfo.textContent =
+    user.email
+      ? `ログイン中：${user.email}`
+      : "ログイン中";
+
+
+  await loadBooks();
+
+}
+
+
+function showLogin() {
+
+  appScreen.classList.add(
+    "hidden"
+  );
+
+  loginScreen.classList.remove(
+    "hidden"
+  );
+
+}
+
+
+/* =========================================================
+   本一覧取得
+   ========================================================= */
+
+async function loadBooks() {
+
+  showLoading();
+
+
+  const {
+    data,
+    error
+  } =
+    await supabaseClient
+      .from("books")
+      .select("*")
+      .order(
+        "created_at",
+        {
+          ascending: false
+        }
+      );
+
+
+  if (error) {
+
+    console.error(error);
+
+    books = [];
+
+    renderBooks();
+
+    showAppMessage(
+      "本棚の読み込みに失敗しました。",
+      "error"
+    );
+
+    return;
+
+  }
+
+
+  books = data || [];
+
+
+  updateSummary();
+
+  updateYearFilter();
+
+  updateTabs();
+
+  updateTabUI();
+
+  renderBooks();
+
+}
+
+
+/* =========================================================
+   本の登録・更新
+   ========================================================= */
+
+bookForm.addEventListener(
+  "submit",
+  async (event) => {
+
+    event.preventDefault();
+
+
+    if (!currentUser) {
+      return;
+    }
+
+
+    const title =
+      titleInput.value.trim();
+
+    const status =
+      statusInput.value;
+
+    const startDate =
+      startDateInput.value;
+
+    const endDate =
+      endDateInput.value;
+
+    const note =
+      noteInput.value.trim();
+
+    const editId =
+      editIdInput.value;
+
+
+    if (!title) {
+
+      showAppMessage(
+        "本のタイトルを入力してください。",
+        "error"
+      );
+
+      return;
+
+    }
+
+
+    if (note.length > 100) {
+
+      showAppMessage(
+        "感想は100文字以内で入力してください。",
+        "error"
+      );
+
+      return;
+
+    }
+
+
+    if (
+      startDate &&
+      endDate &&
+      startDate > endDate
+    ) {
+
+      showAppMessage(
+        "終了日は開始日以降の日付にしてください。",
+        "error"
+      );
+
+      return;
+
+    }
+
+
+    saveButton.disabled =
+      true;
+
+
+    if (editId) {
+
+      await updateBook(
+        editId,
+        {
+          title,
+
+          status,
+
+          start_date:
+            startDate || null,
+
+          end_date:
+            endDate || null,
+
+          note:
+            note || null
+        }
+      );
+
+    } else {
+
+      await insertBook({
+
+        user_id:
+          currentUser.id,
+
+        title,
+
+        status,
+
+        start_date:
+          startDate || null,
+
+        end_date:
+          endDate || null,
+
+        note:
+          note || null
+
       });
 
     }
 
 
-    /*
-    ==========================================================
-    タブ
-    ==========================================================
-    */
+    saveButton.disabled =
+      false;
 
-    tabButtons.forEach(
-      (button) => {
+  }
+);
 
-        button.addEventListener(
-          "click",
-          () => {
 
-            currentTab =
-              button.dataset.tab;
+/* =========================================================
+   INSERT
+   ========================================================= */
 
-            updateTabs();
+async function insertBook(bookData) {
 
-            updateTabUI();
+  const {
+    error
+  } =
+    await supabaseClient
+      .from("books")
+      .insert(bookData);
 
-            renderBooks();
 
-          }
-        );
+  if (error) {
 
-      }
+    console.error(error);
+
+    showAppMessage(
+      "本の登録に失敗しました。",
+      "error"
+    );
+
+    return;
+
+  }
+
+
+  currentTab =
+    bookData.status;
+
+
+  resetForm();
+
+  await loadBooks();
+
+
+  showAppMessage(
+    "本を登録しました。",
+    "success"
+  );
+
+}
+
+
+/* =========================================================
+   UPDATE
+   ========================================================= */
+
+async function updateBook(
+  id,
+  bookData
+) {
+
+  const {
+    error
+  } =
+    await supabaseClient
+      .from("books")
+      .update(bookData)
+      .eq("id", id);
+
+
+  if (error) {
+
+    console.error(error);
+
+    showAppMessage(
+      "更新に失敗しました。",
+      "error"
+    );
+
+    return;
+
+  }
+
+
+  currentTab =
+    bookData.status;
+
+
+  resetForm();
+
+  await loadBooks();
+
+
+  showAppMessage(
+    "本を更新しました。",
+    "success"
+  );
+
+}
+
+
+/* =========================================================
+   DELETE
+   ========================================================= */
+
+async function deleteBook(id) {
+
+  const book =
+    books.find(
+      book =>
+        String(book.id) ===
+        String(id)
     );
 
 
-    function updateTabs() {
-
-      tabButtons.forEach(
-        (button) => {
-
-          button.classList.toggle(
-            "active",
-            button.dataset.tab ===
-              currentTab
-          );
-
-        }
-      );
-
-    }
+  if (!book) {
+    return;
+  }
 
 
-    function updateTabUI() {
+  if (
+    !confirm(
+      `「${book.title}」を削除しますか？`
+    )
+  ) {
 
-      if (
-        currentTab === "want"
-      ) {
+    return;
 
-        yearFilter.classList.add(
-          "hidden"
-        );
-
-        tabDescription.textContent =
-          "これから読みたい本を表示しています。";
-
-      } else {
-
-        yearFilter.classList.remove(
-          "hidden"
-        );
-
-        tabDescription.textContent =
-          "読み終えた本を、読了した年ごとに確認できます。";
-
-      }
-
-    }
+  }
 
 
-    /*
-    ==========================================================
-    年別フィルター
-    ==========================================================
-    */
+  const {
+    error
+  } =
+    await supabaseClient
+      .from("books")
+      .delete()
+      .eq("id", id);
 
-    yearFilter.addEventListener(
-      "change",
-      renderBooks
+
+  if (error) {
+
+    showAppMessage(
+      "削除に失敗しました。",
+      "error"
+    );
+
+    return;
+
+  }
+
+
+  await loadBooks();
+
+
+  showAppMessage(
+    "削除しました。",
+    "success"
+  );
+
+}
+
+
+/* =========================================================
+   編集
+   ========================================================= */
+
+function editBook(id) {
+
+  const book =
+    books.find(
+      book =>
+        String(book.id) ===
+        String(id)
     );
 
 
-    function updateYearFilter() {
-
-      const selectedYear =
-        yearFilter.value;
-
-      const years = [
-        ...new Set(
-          books
-            .filter(
-              (book) =>
-                book.status === "read" &&
-                book.end_date
-            )
-            .map(
-              (book) =>
-                book.end_date.split("-")[0]
-            )
-        )
-      ].sort(
-        (a, b) =>
-          Number(b) -
-          Number(a)
-      );
-
-      yearFilter.innerHTML =
-        `
-          <option value="all">
-            すべての年
-          </option>
-        `;
-
-      years.forEach(
-        (year) => {
-
-          const option =
-            document.createElement(
-              "option"
-            );
-
-          option.value =
-            year;
-
-          option.textContent =
-            `${year}年`;
-
-          yearFilter.appendChild(
-            option
-          );
-
-        }
-      );
-
-      const exists =
-        [...yearFilter.options]
-          .some(
-            (option) =>
-              option.value ===
-              selectedYear
-          );
-
-      yearFilter.value =
-        exists
-          ? selectedYear
-          : "all";
-
-    }
-
-
-    /*
-    ==========================================================
-    集計
-    ==========================================================
-    */
-
-    function updateSummary() {
-
-      wantCount.textContent =
-        books.filter(
-          (book) =>
-            book.status === "want"
-        ).length;
-
-      readCount.textContent =
-        books.filter(
-          (book) =>
-            book.status === "read"
-        ).length;
-
-    }
-
-
-    /*
-    ==========================================================
-    表示
-    ==========================================================
-    */
-
-    function renderBooks() {
-
-      bookList.innerHTML = "";
-
-      let filteredBooks =
-        books.filter(
-          (book) =>
-            book.status ===
-            currentTab
-        );
-
-      if (
-        currentTab === "read" &&
-        yearFilter.value !== "all"
-      ) {
-
-        filteredBooks =
-          filteredBooks.filter(
-            (book) =>
-              book.end_date &&
-              book.end_date
-                .split("-")[0] ===
-                yearFilter.value
-          );
-
-      }
-
-      filteredBooks.sort(
-        (a, b) => {
-
-          const dateA =
-            a.end_date ||
-            a.start_date ||
-            a.created_at ||
-            "";
-
-          const dateB =
-            b.end_date ||
-            b.start_date ||
-            b.created_at ||
-            "";
-
-          return dateB.localeCompare(
-            dateA
-          );
-
-        }
-      );
-
-      if (
-        filteredBooks.length === 0
-      ) {
-
-        bookList.innerHTML =
-          currentTab === "want"
-            ? `
-              <div class="empty-state">
-                <div class="empty-icon">
-                  📚
-                </div>
-                <div>
-                  読みたい本はまだありません。
-                </div>
-              </div>
-            `
-            : `
-              <div class="empty-state">
-                <div class="empty-icon">
-                  📖
-                </div>
-                <div>
-                  読んだ本はまだありません。
-                </div>
-              </div>
-            `;
-
-        return;
-
-      }
-
-      filteredBooks.forEach(
-        (book) => {
-
-          const element =
-            document.createElement(
-              "article"
-            );
-
-          element.className =
-            "book";
-
-          const statusText =
-            book.status === "want"
-              ? "読みたい本"
-              : "読んだ本";
-
-          element.innerHTML = `
-            <div>
-
-              <div class="book-title">
-                ${escapeHtml(
-                  book.title
-                )}
-              </div>
-
-              <div class="book-status-label">
-                ${statusText}
-              </div>
-
-              ${
-                book.start_date ||
-                book.end_date
-                  ? `
-                    <div class="book-dates">
-
-                      ${
-                        book.start_date
-                          ? `
-                            開始：
-                            ${formatDate(
-                              book.start_date
-                            )}
-                            <br>
-                          `
-                          : ""
-                      }
-
-                      ${
-                        book.end_date
-                          ? `
-                            終了：
-                            ${formatDate(
-                              book.end_date
-                            )}
-                          `
-                          : ""
-                      }
-
-                    </div>
-                  `
-                  : ""
-              }
-
-              ${
-                book.note
-                  ? `
-                    <div class="book-note">
-                      ${escapeHtml(
-                        book.note
-                      )}
-                    </div>
-                  `
-                  : ""
-              }
-
-            </div>
-
-            <div class="book-actions">
-
-              <button
-                type="button"
-                class="edit-button"
-                data-edit-id="${book.id}"
-              >
-                編集
-              </button>
-
-              <button
-                type="button"
-                class="delete-button"
-                data-delete-id="${book.id}"
-              >
-                削除
-              </button>
-
-            </div>
-          `;
-
-          bookList.appendChild(
-            element
-          );
-
-        }
-      );
-
-
-      document
-        .querySelectorAll(
-          "[data-edit-id]"
-        )
-        .forEach(
-          (button) => {
-
-            button.addEventListener(
-              "click",
-              () => {
-
-                editBook(
-                  button.dataset.editId
-                );
-
-              }
-            );
-
-          }
-        );
-
-
-      document
-        .querySelectorAll(
-          "[data-delete-id]"
-        )
-        .forEach(
-          (button) => {
-
-            button.addEventListener(
-              "click",
-              () => {
-
-                deleteBook(
-                  button.dataset.deleteId
-                );
-
-              }
-            );
-
-          }
-        );
-
-    }
-
-
-    function showLoading() {
-
-      bookList.innerHTML =
-        `
-          <div class="loading-state">
-            本棚を読み込んでいます...
-          </div>
-        `;
-
-    }
-
-
-    /*
-    ==========================================================
-    フォーム
-    ==========================================================
-    */
-
-    noteInput.addEventListener(
-      "input",
+  if (!book) {
+    return;
+  }
+
+
+  editIdInput.value =
+    book.id;
+
+  titleInput.value =
+    book.title || "";
+
+  statusInput.value =
+    book.status || "want";
+
+  startDateInput.value =
+    book.start_date || "";
+
+  endDateInput.value =
+    book.end_date || "";
+
+  noteInput.value =
+    book.note || "";
+
+
+  noteCount.textContent =
+    noteInput.value.length;
+
+
+  formTitle.textContent =
+    "本を編集";
+
+
+  saveButton.textContent =
+    "変更を保存";
+
+
+  cancelEditButton.style.display =
+    "inline-block";
+
+
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
+
+}
+
+
+/* =========================================================
+   フォーム
+   ========================================================= */
+
+noteInput.addEventListener(
+  "input",
+  () => {
+
+    noteCount.textContent =
+      noteInput.value.length;
+
+  }
+);
+
+
+cancelEditButton.addEventListener(
+  "click",
+  resetForm
+);
+
+
+function resetForm() {
+
+  bookForm.reset();
+
+  editIdInput.value = "";
+
+  noteCount.textContent =
+    "0";
+
+  formTitle.textContent =
+    "本を登録";
+
+  saveButton.textContent =
+    "本棚に追加";
+
+  cancelEditButton.style.display =
+    "none";
+
+}
+
+
+/* =========================================================
+   タブ
+   ========================================================= */
+
+tabButtons.forEach(
+  button => {
+
+    button.addEventListener(
+      "click",
       () => {
 
-        noteCount.textContent =
-          noteInput.value.length;
+        currentTab =
+          button.dataset.tab;
+
+        updateTabs();
+
+        updateTabUI();
+
+        renderBooks();
 
       }
     );
 
+  }
+);
 
-    cancelEditButton.addEventListener(
-      "click",
-      resetForm
+
+function updateTabs() {
+
+  tabButtons.forEach(
+    button => {
+
+      button.classList.toggle(
+        "active",
+        button.dataset.tab ===
+          currentTab
+      );
+
+    }
+  );
+
+}
+
+
+function updateTabUI() {
+
+  if (
+    currentTab === "want"
+  ) {
+
+    yearFilter.classList.add(
+      "hidden"
+    );
+
+    tabDescription.textContent =
+      "これから読みたい本を表示しています。";
+
+  } else {
+
+    yearFilter.classList.remove(
+      "hidden"
+    );
+
+    tabDescription.textContent =
+      "読んだ本を読了年ごとに確認できます。";
+
+  }
+
+}
+
+
+/* =========================================================
+   年フィルター
+   ========================================================= */
+
+yearFilter.addEventListener(
+  "change",
+  renderBooks
+);
+
+
+function updateYearFilter() {
+
+  const selected =
+    yearFilter.value;
+
+
+  const years =
+    [
+      ...new Set(
+
+        books
+
+          .filter(
+            book =>
+              book.status ===
+                "read" &&
+              book.end_date
+          )
+
+          .map(
+            book =>
+              book.end_date
+                .split("-")[0]
+          )
+
+      )
+    ]
+    .sort(
+      (a,b) =>
+        Number(b) -
+        Number(a)
     );
 
 
-    function resetForm() {
-
-      bookForm.reset();
-
-      editIdInput.value = "";
-
-      noteCount.textContent =
-        "0";
-
-      formTitle.textContent =
-        "本を登録";
-
-      saveButton.textContent =
-        "本棚に追加";
-
-      saveButton.disabled =
-        false;
-
-      cancelEditButton.style.display =
-        "none";
-
-    }
+  yearFilter.innerHTML =
+    `
+      <option value="all">
+        すべての年
+      </option>
+    `;
 
 
-    /*
-    ==========================================================
-    メッセージ
-    ==========================================================
-    */
+  years.forEach(
+    year => {
 
-    function showLoginError(message) {
-
-      loginError.textContent =
-        message;
-
-      loginError.className =
-        "login-error error";
-
-    }
-
-
-    function clearLoginError() {
-
-      loginError.textContent =
-        "";
-
-      loginError.className =
-        "login-error";
-
-    }
-
-
-    function showAppMessage(
-      message,
-      type
-    ) {
-
-      appMessage.textContent =
-        message;
-
-      appMessage.className =
-        `app-message ${type}`;
-
-      setTimeout(
-        () => {
-          clearAppMessage();
-        },
-        4000
-      );
-
-    }
-
-
-    function clearAppMessage() {
-
-      appMessage.textContent =
-        "";
-
-      appMessage.className =
-        "app-message";
-
-    }
-
-
-    /*
-    ==========================================================
-    その他
-    ==========================================================
-    */
-
-    function formatDate(date) {
-
-      if (!date) {
-        return "";
-      }
-
-      const [
-        year,
-        month,
-        day
-      ] =
-        date.split("-");
-
-      return (
-        `${year}/${month}/${day}`
-      );
-
-    }
-
-
-    function escapeHtml(text) {
-
-      const div =
+      const option =
         document.createElement(
-          "div"
+          "option"
         );
 
-      div.textContent =
-        text || "";
+      option.value =
+        year;
 
-      return div.innerHTML;
+      option.textContent =
+        `${year}年`;
+
+      yearFilter.appendChild(
+        option
+      );
 
     }
+  );
 
-  </script>
+
+  yearFilter.value =
+    years.includes(selected)
+      ? selected
+      : "all";
+
+}
+
+
+/* =========================================================
+   集計
+   ========================================================= */
+
+function updateSummary() {
+
+  wantCount.textContent =
+    books.filter(
+      book =>
+        book.status === "want"
+    ).length;
+
+
+  readCount.textContent =
+    books.filter(
+      book =>
+        book.status === "read"
+    ).length;
+
+}
+
+
+/* =========================================================
+   本棚表示
+   ========================================================= */
+
+function renderBooks() {
+
+  bookList.innerHTML = "";
+
+
+  let filtered =
+    books.filter(
+      book =>
+        book.status ===
+        currentTab
+    );
+
+
+  if (
+    currentTab === "read" &&
+    yearFilter.value !== "all"
+  ) {
+
+    filtered =
+      filtered.filter(
+        book =>
+          book.end_date &&
+          book.end_date
+            .startsWith(
+              yearFilter.value
+            )
+      );
+
+  }
+
+
+  if (
+    filtered.length === 0
+  ) {
+
+    bookList.innerHTML =
+      `
+        <div class="empty-state">
+          本はまだ登録されていません。
+        </div>
+      `;
+
+    return;
+
+  }
+
+
+  filtered.forEach(
+    book => {
+
+      const element =
+        document.createElement(
+          "article"
+        );
+
+
+      element.className =
+        "book";
+
+
+      element.innerHTML =
+        `
+
+          <div>
+
+            <div class="book-title">
+              ${escapeHtml(
+                book.title
+              )}
+            </div>
+
+            <div class="book-status-label">
+
+              ${
+                book.status === "want"
+                  ? "読みたい本"
+                  : "読んだ本"
+              }
+
+            </div>
+
+
+            <div class="book-dates">
+
+              ${
+                book.start_date
+                  ? `開始：${formatDate(
+                      book.start_date
+                    )}<br>`
+                  : ""
+              }
+
+              ${
+                book.end_date
+                  ? `終了：${formatDate(
+                      book.end_date
+                    )}`
+                  : ""
+              }
+
+            </div>
+
+
+            ${
+              book.note
+                ?
+                `
+                  <div class="book-note">
+                    ${escapeHtml(
+                      book.note
+                    )}
+                  </div>
+                `
+                :
+                ""
+            }
+
+          </div>
+
+
+          <div class="book-actions">
+
+            <button
+              class="edit-button"
+              data-edit="${book.id}"
+            >
+              編集
+            </button>
+
+            <button
+              class="delete-button"
+              data-delete="${book.id}"
+            >
+              削除
+            </button>
+
+          </div>
+
+        `;
+
+
+      bookList.appendChild(
+        element
+      );
+
+    }
+  );
+
+
+  document
+    .querySelectorAll(
+      "[data-edit]"
+    )
+    .forEach(
+      button => {
+
+        button.onclick =
+          () =>
+            editBook(
+              button.dataset.edit
+            );
+
+      }
+    );
+
+
+  document
+    .querySelectorAll(
+      "[data-delete]"
+    )
+    .forEach(
+      button => {
+
+        button.onclick =
+          () =>
+            deleteBook(
+              button.dataset.delete
+            );
+
+      }
+    );
+
+}
+
+
+function showLoading() {
+
+  bookList.innerHTML =
+    `
+      <div class="loading-state">
+        本棚を読み込んでいます...
+      </div>
+    `;
+
+}
+
+
+/* =========================================================
+   メッセージ
+   ========================================================= */
+
+function showLoginMessage(
+  message,
+  type
+) {
+
+  loginMessage.textContent =
+    message;
+
+  loginMessage.className =
+    `message ${type}`;
+
+}
+
+
+function clearLoginMessage() {
+
+  loginMessage.textContent = "";
+
+  loginMessage.className =
+    "message";
+
+}
+
+
+function showAppMessage(
+  message,
+  type
+) {
+
+  appMessage.textContent =
+    message;
+
+  appMessage.className =
+    `message ${type}`;
+
+}
+
+
+/* =========================================================
+   その他
+   ========================================================= */
+
+function formatDate(date) {
+
+  if (!date) {
+    return "";
+  }
+
+
+  const [
+    year,
+    month,
+    day
+  ] =
+    date.split("-");
+
+
+  return `${year}/${month}/${day}`;
+
+}
+
+
+function escapeHtml(text) {
+
+  const div =
+    document.createElement(
+      "div"
+    );
+
+
+  div.textContent =
+    text || "";
+
+
+  return div.innerHTML;
+
+}
+
+</script>
 
 </body>
 </html>
