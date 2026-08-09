@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>わたしの本棚</title>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
   <style>
     * {
       box-sizing: border-box;
@@ -50,6 +52,10 @@
       cursor: pointer;
     }
 
+    .hidden {
+      display: none !important;
+    }
+
     .container {
       width: min(1100px, calc(100% - 32px));
       margin: 0 auto;
@@ -86,6 +92,18 @@
     .panel-title {
       margin: 0 0 18px;
       font-size: 20px;
+    }
+
+    .login-container {
+      max-width: 450px;
+      margin: 50px auto;
+    }
+
+    .login-description {
+      color: var(--sub-text);
+      font-size: 14px;
+      margin-bottom: 20px;
+      line-height: 1.7;
     }
 
     .form-grid {
@@ -141,16 +159,23 @@
       font-size: 12px;
     }
 
-    .form-actions {
+    .form-actions,
+    .header-actions {
       display: flex;
       gap: 10px;
       align-items: center;
     }
 
+    .header-actions {
+      justify-content: flex-end;
+      margin-bottom: 16px;
+    }
+
     .primary-button,
     .secondary-button,
     .edit-button,
-    .delete-button {
+    .delete-button,
+    .logout-button {
       border: 0;
       border-radius: 9px;
       padding: 10px 16px;
@@ -162,7 +187,8 @@
     .primary-button:hover,
     .secondary-button:hover,
     .edit-button:hover,
-    .delete-button:hover {
+    .delete-button:hover,
+    .logout-button:hover {
       transform: translateY(-1px);
     }
 
@@ -176,6 +202,43 @@
       display: none;
       background: #ddd2c7;
       color: var(--text);
+    }
+
+    .logout-button {
+      background: #ddd2c7;
+      color: var(--text);
+    }
+
+    .login-button {
+      width: 100%;
+    }
+
+    .login-error,
+    .app-message {
+      margin-top: 12px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      display: none;
+    }
+
+    .login-error.error,
+    .app-message.error {
+      display: block;
+      background: #fbe6e6;
+      color: #872f2f;
+    }
+
+    .app-message.success {
+      display: block;
+      background: #e8f2e8;
+      color: #315f31;
+    }
+
+    .user-info {
+      margin-right: auto;
+      color: var(--sub-text);
+      font-size: 13px;
     }
 
     .tabs {
@@ -220,8 +283,30 @@
       width: 160px;
     }
 
-    .year-filter.hidden {
-      display: none;
+    .summary {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+
+    .summary-card {
+      min-width: 150px;
+      padding: 13px 16px;
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.65);
+      border-radius: 12px;
+    }
+
+    .summary-label {
+      color: var(--sub-text);
+      font-size: 12px;
+    }
+
+    .summary-number {
+      margin-top: 2px;
+      font-size: 24px;
+      font-weight: 700;
     }
 
     .bookshelf {
@@ -295,9 +380,6 @@
 
     .book:hover {
       transform: translateY(-7px) rotate(-0.7deg);
-      box-shadow:
-        6px 10px 16px rgba(49, 31, 19, 0.34),
-        inset -5px 0 0 rgba(0, 0, 0, 0.08);
     }
 
     .book:nth-child(6n + 1) {
@@ -357,6 +439,15 @@
       opacity: 0.9;
     }
 
+    .book-note {
+      margin-top: 10px;
+      font-size: 11px;
+      line-height: 1.5;
+      border-top: 1px solid rgba(255,255,255,0.18);
+      padding-top: 8px;
+      word-break: break-word;
+    }
+
     .book-actions {
       display: flex;
       gap: 6px;
@@ -380,16 +471,8 @@
       color: white;
     }
 
-    .book-note {
-      margin-top: 10px;
-      font-size: 11px;
-      line-height: 1.5;
-      border-top: 1px solid rgba(255,255,255,0.18);
-      padding-top: 8px;
-      word-break: break-word;
-    }
-
-    .empty-state {
+    .empty-state,
+    .loading-state {
       grid-column: 1 / -1;
       min-height: 180px;
       display: flex;
@@ -406,32 +489,6 @@
     .empty-icon {
       font-size: 42px;
       margin-bottom: 8px;
-    }
-
-    .summary {
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-      margin-bottom: 16px;
-    }
-
-    .summary-card {
-      min-width: 150px;
-      padding: 13px 16px;
-      border: 1px solid var(--border);
-      background: rgba(255, 255, 255, 0.65);
-      border-radius: 12px;
-    }
-
-    .summary-label {
-      color: var(--sub-text);
-      font-size: 12px;
-    }
-
-    .summary-number {
-      margin-top: 2px;
-      font-size: 24px;
-      font-weight: 700;
     }
 
     @media (max-width: 720px) {
@@ -471,43 +528,137 @@
         padding-left: 14px;
         padding-right: 14px;
       }
-    }
 
-    @media (max-width: 380px) {
-      .book-grid {
-        grid-template-columns: 1fr 1fr;
+      .header-actions {
+        flex-wrap: wrap;
       }
 
-      .book {
-        padding-left: 10px;
-        padding-right: 10px;
+      .user-info {
+        width: 100%;
       }
     }
   </style>
 </head>
 
 <body>
-  <main class="container">
+
+  <!-- ログイン画面 -->
+  <section id="loginScreen" class="login-container panel">
+
+    <h1 class="panel-title">
+      わたしの本棚
+    </h1>
+
+    <p class="login-description">
+      Supabaseに登録したメールアドレスとパスワードでログインしてください。
+    </p>
+
+    <form id="loginForm">
+
+      <div class="form-group">
+        <label for="loginEmail">
+          メールアドレス
+        </label>
+
+        <input
+          type="email"
+          id="loginEmail"
+          autocomplete="email"
+          required
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="loginPassword">
+          パスワード
+        </label>
+
+        <input
+          type="password"
+          id="loginPassword"
+          autocomplete="current-password"
+          required
+        />
+      </div>
+
+      <button
+        type="submit"
+        class="primary-button login-button"
+        id="loginButton"
+      >
+        ログイン
+      </button>
+
+      <div
+        id="loginError"
+        class="login-error"
+      ></div>
+
+    </form>
+
+  </section>
+
+
+  <!-- アプリ本体 -->
+  <main
+    id="appScreen"
+    class="container hidden"
+  >
 
     <header class="app-header">
-      <h1 class="app-title">わたしの本棚</h1>
+
+      <h1 class="app-title">
+        わたしの本棚
+      </h1>
+
       <p class="app-subtitle">
         読みたい本と、読んだ本をシンプルに記録
       </p>
+
     </header>
 
+    <div class="header-actions">
+
+      <div
+        id="userInfo"
+        class="user-info"
+      ></div>
+
+      <button
+        type="button"
+        id="logoutButton"
+        class="logout-button"
+      >
+        ログアウト
+      </button>
+
+    </div>
+
+    <div
+      id="appMessage"
+      class="app-message"
+    ></div>
+
     <section class="panel">
-      <h2 class="panel-title" id="formTitle">
+
+      <h2
+        class="panel-title"
+        id="formTitle"
+      >
         本を登録
       </h2>
 
       <form id="bookForm">
 
-        <input type="hidden" id="editId" />
+        <input
+          type="hidden"
+          id="editId"
+        />
 
         <div class="form-grid">
 
           <div class="form-group">
+
             <label for="title">
               本のタイトル
             </label>
@@ -518,14 +669,17 @@
               placeholder="例：吾輩は猫である"
               required
             />
+
           </div>
 
           <div class="form-group">
+
             <label for="status">
               種類
             </label>
 
             <select id="status">
+
               <option value="want">
                 読みたい本
               </option>
@@ -533,10 +687,13 @@
               <option value="read">
                 読んだ本
               </option>
+
             </select>
+
           </div>
 
           <div class="form-group">
+
             <label for="startDate">
               読書開始日
             </label>
@@ -545,9 +702,11 @@
               type="date"
               id="startDate"
             />
+
           </div>
 
           <div class="form-group">
+
             <label for="endDate">
               読書終了日
             </label>
@@ -556,9 +715,11 @@
               type="date"
               id="endDate"
             />
+
           </div>
 
           <div class="form-group full">
+
             <label for="note">
               備考・感想（100字以内）
             </label>
@@ -573,6 +734,7 @@
               <span id="noteCount">0</span>
               / 100文字
             </div>
+
           </div>
 
         </div>
@@ -580,16 +742,16 @@
         <div class="form-actions">
 
           <button
-            class="primary-button"
             type="submit"
+            class="primary-button"
             id="saveButton"
           >
             本棚に追加
           </button>
 
           <button
-            class="secondary-button"
             type="button"
+            class="secondary-button"
             id="cancelEditButton"
           >
             編集をキャンセル
@@ -598,6 +760,7 @@
         </div>
 
       </form>
+
     </section>
 
     <section class="panel">
@@ -625,6 +788,7 @@
       <div class="summary">
 
         <div class="summary-card">
+
           <div class="summary-label">
             読みたい本
           </div>
@@ -635,9 +799,11 @@
           >
             0
           </div>
+
         </div>
 
         <div class="summary-card">
+
           <div class="summary-label">
             読んだ本
           </div>
@@ -648,6 +814,7 @@
           >
             0
           </div>
+
         </div>
 
       </div>
@@ -673,10 +840,12 @@
       </div>
 
       <div class="bookshelf">
+
         <div
           class="book-grid"
           id="bookList"
         ></div>
+
       </div>
 
     </section>
@@ -684,7 +853,68 @@
   </main>
 
   <script>
-    const STORAGE_KEY = "readingBooks";
+
+    /*
+    ==========================================================
+    ★★★ ここだけ自分のSupabase情報に変更してください ★★★
+    ==========================================================
+    */
+
+    const SUPABASE_URL =
+      "https://iivycgqxkxkwtjwstgpl.supabase.co";
+
+    const SUPABASE_PUBLISHABLE_KEY =
+      "sb_publishable_d8NnwWFU7eUlxpcL040qsg_SrCK2WWP";
+
+
+    /*
+    ==========================================================
+    Supabase初期化
+    ==========================================================
+    */
+
+    const supabaseClient =
+      window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_PUBLISHABLE_KEY
+      );
+
+
+    /*
+    ==========================================================
+    DOM
+    ==========================================================
+    */
+
+    const loginScreen =
+      document.getElementById("loginScreen");
+
+    const appScreen =
+      document.getElementById("appScreen");
+
+    const loginForm =
+      document.getElementById("loginForm");
+
+    const loginEmail =
+      document.getElementById("loginEmail");
+
+    const loginPassword =
+      document.getElementById("loginPassword");
+
+    const loginButton =
+      document.getElementById("loginButton");
+
+    const loginError =
+      document.getElementById("loginError");
+
+    const logoutButton =
+      document.getElementById("logoutButton");
+
+    const userInfo =
+      document.getElementById("userInfo");
+
+    const appMessage =
+      document.getElementById("appMessage");
 
     const bookForm =
       document.getElementById("bookForm");
@@ -739,97 +969,277 @@
     const formTitle =
       document.getElementById("formTitle");
 
-    let books = loadBooks();
+
+    /*
+    ==========================================================
+    状態
+    ==========================================================
+    */
+
+    let books = [];
+
+    let currentUser = null;
 
     let currentTab = "want";
 
-    function loadBooks() {
-      const data =
-        localStorage.getItem(STORAGE_KEY);
 
-      if (!data) {
-        return [];
+    /*
+    ==========================================================
+    初期化
+    ==========================================================
+    */
+
+    initializeApp();
+
+
+    async function initializeApp() {
+
+      const {
+        data: { session },
+        error
+      } =
+        await supabaseClient.auth.getSession();
+
+      if (error) {
+
+        console.error(error);
+
+        showLogin();
+
+        return;
       }
 
-      try {
-        return JSON.parse(data);
-      } catch (error) {
-        console.error(
-          "データの読み込みに失敗しました。",
+      if (session?.user) {
+
+        await startApp(session.user);
+
+      } else {
+
+        showLogin();
+
+      }
+
+    }
+
+
+    /*
+    ==========================================================
+    ログイン
+    ==========================================================
+    */
+
+    loginForm.addEventListener(
+      "submit",
+      async (event) => {
+
+        event.preventDefault();
+
+        clearLoginError();
+
+        loginButton.disabled = true;
+
+        loginButton.textContent =
+          "ログイン中...";
+
+        const email =
+          loginEmail.value.trim();
+
+        const password =
+          loginPassword.value;
+
+        const {
+          data,
           error
+        } =
+          await supabaseClient.auth
+            .signInWithPassword({
+              email,
+              password
+            });
+
+        loginButton.disabled = false;
+
+        loginButton.textContent =
+          "ログイン";
+
+        if (error) {
+
+          console.error(error);
+
+          showLoginError(
+            "ログインに失敗しました。メールアドレスまたはパスワードを確認してください。"
+          );
+
+          return;
+        }
+
+        if (data.user) {
+
+          loginForm.reset();
+
+          await startApp(data.user);
+
+        }
+
+      }
+    );
+
+
+    /*
+    ==========================================================
+    ログアウト
+    ==========================================================
+    */
+
+    logoutButton.addEventListener(
+      "click",
+      async () => {
+
+        const { error } =
+          await supabaseClient.auth
+            .signOut();
+
+        if (error) {
+
+          showAppMessage(
+            "ログアウトに失敗しました。",
+            "error"
+          );
+
+          return;
+        }
+
+        books = [];
+
+        currentUser = null;
+
+        resetForm();
+
+        showLogin();
+
+      }
+    );
+
+
+    /*
+    ==========================================================
+    アプリ開始
+    ==========================================================
+    */
+
+    async function startApp(user) {
+
+      currentUser = user;
+
+      loginScreen.classList.add(
+        "hidden"
+      );
+
+      appScreen.classList.remove(
+        "hidden"
+      );
+
+      userInfo.textContent =
+        user.email
+          ? `ログイン中：${user.email}`
+          : "ログイン中";
+
+      await loadBooks();
+
+    }
+
+
+    function showLogin() {
+
+      appScreen.classList.add(
+        "hidden"
+      );
+
+      loginScreen.classList.remove(
+        "hidden"
+      );
+
+    }
+
+
+    /*
+    ==========================================================
+    本一覧取得
+    ==========================================================
+    */
+
+    async function loadBooks() {
+
+      showLoading();
+
+      const {
+        data,
+        error
+      } =
+        await supabaseClient
+          .from("books")
+          .select("*")
+          .order(
+            "created_at",
+            {
+              ascending: false
+            }
+          );
+
+      if (error) {
+
+        console.error(error);
+
+        books = [];
+
+        renderBooks();
+
+        showAppMessage(
+          "本のデータ取得に失敗しました。SupabaseのRLS設定とテーブル構成を確認してください。",
+          "error"
         );
 
-        return [];
+        return;
       }
+
+      books = data || [];
+
+      updateYearFilter();
+
+      updateSummary();
+
+      updateTabs();
+
+      updateTabUI();
+
+      renderBooks();
+
     }
 
-    function saveBooks() {
-      localStorage.setItem(
-        STORAGE_KEY,
-        JSON.stringify(books)
-      );
-    }
 
-    function createId() {
-      if (
-        window.crypto &&
-        crypto.randomUUID
-      ) {
-        return crypto.randomUUID();
-      }
-
-      return (
-        Date.now().toString() +
-        Math.random()
-          .toString(16)
-          .slice(2)
-      );
-    }
-
-    noteInput.addEventListener(
-      "input",
-      () => {
-        noteCount.textContent =
-          noteInput.value.length;
-      }
-    );
-
-    tabButtons.forEach(
-      (button) => {
-        button.addEventListener(
-          "click",
-          () => {
-            currentTab =
-              button.dataset.tab;
-
-            tabButtons.forEach(
-              (tab) => {
-                tab.classList.remove(
-                  "active"
-                );
-              }
-            );
-
-            button.classList.add(
-              "active"
-            );
-
-            updateTabUI();
-            renderBooks();
-          }
-        );
-      }
-    );
-
-    yearFilter.addEventListener(
-      "change",
-      renderBooks
-    );
+    /*
+    ==========================================================
+    本追加・編集
+    ==========================================================
+    */
 
     bookForm.addEventListener(
       "submit",
-      (event) => {
+      async (event) => {
+
         event.preventDefault();
+
+        clearAppMessage();
+
+        if (!currentUser) {
+
+          showAppMessage(
+            "ログイン状態を確認してください。",
+            "error"
+          );
+
+          return;
+        }
 
         const title =
           titleInput.value.trim();
@@ -850,16 +1260,20 @@
           editIdInput.value;
 
         if (!title) {
-          alert(
-            "本のタイトルを入力してください。"
+
+          showAppMessage(
+            "本のタイトルを入力してください。",
+            "error"
           );
 
           return;
         }
 
         if (note.length > 100) {
-          alert(
-            "備考・感想は100文字以内で入力してください。"
+
+          showAppMessage(
+            "備考・感想は100文字以内で入力してください。",
+            "error"
           );
 
           return;
@@ -870,8 +1284,10 @@
           endDate &&
           startDate > endDate
         ) {
-          alert(
-            "読書終了日は読書開始日以降の日付を指定してください。"
+
+          showAppMessage(
+            "読書終了日は読書開始日以降の日付を指定してください。",
+            "error"
           );
 
           return;
@@ -881,6 +1297,7 @@
           status === "read" &&
           !endDate
         ) {
+
           const proceed =
             confirm(
               "読んだ本ですが、読書終了日が入力されていません。このまま保存しますか？"
@@ -889,93 +1306,327 @@
           if (!proceed) {
             return;
           }
+
         }
+
+        saveButton.disabled = true;
+
+        saveButton.textContent =
+          editId
+            ? "保存中..."
+            : "追加中...";
+
 
         if (editId) {
 
-          const index =
-            books.findIndex(
-              (book) =>
-                book.id === editId
-            );
-
-          if (index !== -1) {
-            books[index] = {
-              ...books[index],
+          await updateBook(
+            editId,
+            {
               title,
               status,
-              startDate,
-              endDate,
-              note,
-              updatedAt:
-                new Date().toISOString()
-            };
-          }
+              start_date:
+                startDate || null,
+              end_date:
+                endDate || null,
+              note:
+                note || null
+            }
+          );
 
         } else {
 
-          books.push({
-            id: createId(),
+          await insertBook({
+            user_id:
+              currentUser.id,
+
             title,
+
             status,
-            startDate,
-            endDate,
-            note,
-            createdAt:
-              new Date().toISOString()
+
+            start_date:
+              startDate || null,
+
+            end_date:
+              endDate || null,
+
+            note:
+              note || null
           });
 
         }
 
-        saveBooks();
+        saveButton.disabled = false;
 
-        currentTab = status;
+        saveButton.textContent =
+          "本棚に追加";
 
-        resetForm();
-        updateTabs();
-        updateYearFilter();
-        updateSummary();
-        updateTabUI();
-        renderBooks();
       }
     );
 
-    cancelEditButton.addEventListener(
-      "click",
-      resetForm
-    );
 
-    function resetForm() {
-      bookForm.reset();
+    /*
+    ==========================================================
+    DB INSERT
+    ==========================================================
+    */
 
-      editIdInput.value = "";
+    async function insertBook(bookData) {
 
-      noteCount.textContent = "0";
+      const {
+        error
+      } =
+        await supabaseClient
+          .from("books")
+          .insert(bookData);
 
-      formTitle.textContent =
-        "本を登録";
+      if (error) {
 
-      saveButton.textContent =
-        "本棚に追加";
+        console.error(error);
 
-      cancelEditButton.style.display =
-        "none";
+        showAppMessage(
+          "本の登録に失敗しました。",
+          "error"
+        );
+
+        return;
+      }
+
+      currentTab =
+        bookData.status;
+
+      resetForm();
+
+      await loadBooks();
+
+      showAppMessage(
+        "本を登録しました。",
+        "success"
+      );
+
     }
 
+
+    /*
+    ==========================================================
+    DB UPDATE
+    ==========================================================
+    */
+
+    async function updateBook(
+      id,
+      bookData
+    ) {
+
+      const {
+        error
+      } =
+        await supabaseClient
+          .from("books")
+          .update(bookData)
+          .eq("id", id);
+
+      if (error) {
+
+        console.error(error);
+
+        showAppMessage(
+          "本の更新に失敗しました。",
+          "error"
+        );
+
+        return;
+      }
+
+      currentTab =
+        bookData.status;
+
+      resetForm();
+
+      await loadBooks();
+
+      showAppMessage(
+        "本を更新しました。",
+        "success"
+      );
+
+    }
+
+
+    /*
+    ==========================================================
+    DB DELETE
+    ==========================================================
+    */
+
+    async function deleteBook(id) {
+
+      const book =
+        books.find(
+          (book) =>
+            String(book.id) ===
+            String(id)
+        );
+
+      if (!book) {
+        return;
+      }
+
+      const confirmed =
+        confirm(
+          `「${book.title}」を削除しますか？`
+        );
+
+      if (!confirmed) {
+        return;
+      }
+
+      const {
+        error
+      } =
+        await supabaseClient
+          .from("books")
+          .delete()
+          .eq("id", id);
+
+      if (error) {
+
+        console.error(error);
+
+        showAppMessage(
+          "削除に失敗しました。",
+          "error"
+        );
+
+        return;
+      }
+
+      if (
+        String(editIdInput.value) ===
+        String(id)
+      ) {
+
+        resetForm();
+
+      }
+
+      await loadBooks();
+
+      showAppMessage(
+        "本を削除しました。",
+        "success"
+      );
+
+    }
+
+
+    /*
+    ==========================================================
+    編集
+    ==========================================================
+    */
+
+    function editBook(id) {
+
+      const book =
+        books.find(
+          (book) =>
+            String(book.id) ===
+            String(id)
+        );
+
+      if (!book) {
+        return;
+      }
+
+      editIdInput.value =
+        book.id;
+
+      titleInput.value =
+        book.title || "";
+
+      statusInput.value =
+        book.status || "want";
+
+      startDateInput.value =
+        book.start_date || "";
+
+      endDateInput.value =
+        book.end_date || "";
+
+      noteInput.value =
+        book.note || "";
+
+      noteCount.textContent =
+        noteInput.value.length;
+
+      formTitle.textContent =
+        "本を編集";
+
+      saveButton.textContent =
+        "変更を保存";
+
+      cancelEditButton.style.display =
+        "inline-block";
+
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+      });
+
+    }
+
+
+    /*
+    ==========================================================
+    タブ
+    ==========================================================
+    */
+
+    tabButtons.forEach(
+      (button) => {
+
+        button.addEventListener(
+          "click",
+          () => {
+
+            currentTab =
+              button.dataset.tab;
+
+            updateTabs();
+
+            updateTabUI();
+
+            renderBooks();
+
+          }
+        );
+
+      }
+    );
+
+
     function updateTabs() {
+
       tabButtons.forEach(
         (button) => {
+
           button.classList.toggle(
             "active",
             button.dataset.tab ===
               currentTab
           );
+
         }
       );
+
     }
 
+
     function updateTabUI() {
-      if (currentTab === "want") {
+
+      if (
+        currentTab === "want"
+      ) {
 
         yearFilter.classList.add(
           "hidden"
@@ -992,22 +1643,23 @@
 
         tabDescription.textContent =
           "読み終えた本を、読了した年ごとに確認できます。";
+
       }
+
     }
 
-    function updateSummary() {
-      wantCount.textContent =
-        books.filter(
-          (book) =>
-            book.status === "want"
-        ).length;
 
-      readCount.textContent =
-        books.filter(
-          (book) =>
-            book.status === "read"
-        ).length;
-    }
+    /*
+    ==========================================================
+    年別フィルター
+    ==========================================================
+    */
+
+    yearFilter.addEventListener(
+      "change",
+      renderBooks
+    );
+
 
     function updateYearFilter() {
 
@@ -1019,15 +1671,12 @@
           books
             .filter(
               (book) =>
-                book.status ===
-                  "read" &&
-                book.endDate
+                book.status === "read" &&
+                book.end_date
             )
             .map(
               (book) =>
-                book.endDate.split(
-                  "-"
-                )[0]
+                book.end_date.split("-")[0]
             )
         )
       ].sort(
@@ -1045,12 +1694,14 @@
 
       years.forEach(
         (year) => {
+
           const option =
             document.createElement(
               "option"
             );
 
-          option.value = year;
+          option.value =
+            year;
 
           option.textContent =
             `${year}年`;
@@ -1058,21 +1709,54 @@
           yearFilter.appendChild(
             option
           );
+
         }
       );
 
-      const optionExists =
-        [...yearFilter.options].some(
-          (option) =>
-            option.value ===
-            selectedYear
-        );
+      const exists =
+        [...yearFilter.options]
+          .some(
+            (option) =>
+              option.value ===
+              selectedYear
+          );
 
       yearFilter.value =
-        optionExists
+        exists
           ? selectedYear
           : "all";
+
     }
+
+
+    /*
+    ==========================================================
+    集計
+    ==========================================================
+    */
+
+    function updateSummary() {
+
+      wantCount.textContent =
+        books.filter(
+          (book) =>
+            book.status === "want"
+        ).length;
+
+      readCount.textContent =
+        books.filter(
+          (book) =>
+            book.status === "read"
+        ).length;
+
+    }
+
+
+    /*
+    ==========================================================
+    表示
+    ==========================================================
+    */
 
     function renderBooks() {
 
@@ -1089,35 +1773,37 @@
         currentTab === "read" &&
         yearFilter.value !== "all"
       ) {
+
         filteredBooks =
           filteredBooks.filter(
             (book) =>
-              book.endDate &&
-              book.endDate.split(
-                "-"
-              )[0] ===
+              book.end_date &&
+              book.end_date
+                .split("-")[0] ===
                 yearFilter.value
           );
+
       }
 
       filteredBooks.sort(
         (a, b) => {
 
           const dateA =
-            a.endDate ||
-            a.startDate ||
-            a.createdAt ||
+            a.end_date ||
+            a.start_date ||
+            a.created_at ||
             "";
 
           const dateB =
-            b.endDate ||
-            b.startDate ||
-            b.createdAt ||
+            b.end_date ||
+            b.start_date ||
+            b.created_at ||
             "";
 
           return dateB.localeCompare(
             dateA
           );
+
         }
       );
 
@@ -1125,49 +1811,42 @@
         filteredBooks.length === 0
       ) {
 
-        const empty =
-          document.createElement(
-            "div"
-          );
-
-        empty.className =
-          "empty-state";
-
-        empty.innerHTML =
+        bookList.innerHTML =
           currentTab === "want"
             ? `
-              <div class="empty-icon">
-                📚
-              </div>
-              <div>
-                読みたい本はまだありません。
+              <div class="empty-state">
+                <div class="empty-icon">
+                  📚
+                </div>
+                <div>
+                  読みたい本はまだありません。
+                </div>
               </div>
             `
             : `
-              <div class="empty-icon">
-                📖
-              </div>
-              <div>
-                読んだ本はまだありません。
+              <div class="empty-state">
+                <div class="empty-icon">
+                  📖
+                </div>
+                <div>
+                  読んだ本はまだありません。
+                </div>
               </div>
             `;
 
-        bookList.appendChild(
-          empty
-        );
-
         return;
+
       }
 
       filteredBooks.forEach(
         (book) => {
 
-          const bookElement =
+          const element =
             document.createElement(
               "article"
             );
 
-          bookElement.className =
+          element.className =
             "book";
 
           const statusText =
@@ -1175,21 +1854,7 @@
               ? "読みたい本"
               : "読んだ本";
 
-          const startText =
-            book.startDate
-              ? formatDate(
-                  book.startDate
-                )
-              : "未設定";
-
-          const endText =
-            book.endDate
-              ? formatDate(
-                  book.endDate
-                )
-              : "未設定";
-
-          bookElement.innerHTML = `
+          element.innerHTML = `
             <div>
 
               <div class="book-title">
@@ -1203,26 +1868,30 @@
               </div>
 
               ${
-                book.startDate ||
-                book.endDate
+                book.start_date ||
+                book.end_date
                   ? `
                     <div class="book-dates">
 
                       ${
-                        book.startDate
+                        book.start_date
                           ? `
                             開始：
-                            ${startText}
+                            ${formatDate(
+                              book.start_date
+                            )}
                             <br>
                           `
                           : ""
                       }
 
                       ${
-                        book.endDate
+                        book.end_date
                           ? `
                             終了：
-                            ${endText}
+                            ${formatDate(
+                              book.end_date
+                            )}
                           `
                           : ""
                       }
@@ -1268,10 +1937,12 @@
           `;
 
           bookList.appendChild(
-            bookElement
+            element
           );
+
         }
       );
+
 
       document
         .querySelectorAll(
@@ -1279,16 +1950,21 @@
         )
         .forEach(
           (button) => {
+
             button.addEventListener(
               "click",
               () => {
+
                 editBook(
                   button.dataset.editId
                 );
+
               }
             );
+
           }
         );
+
 
       document
         .querySelectorAll(
@@ -1296,106 +1972,148 @@
         )
         .forEach(
           (button) => {
+
             button.addEventListener(
               "click",
               () => {
+
                 deleteBook(
-                  button.dataset
-                    .deleteId
+                  button.dataset.deleteId
                 );
+
               }
             );
+
           }
         );
+
     }
 
-    function editBook(id) {
 
-      const book =
-        books.find(
-          (book) =>
-            book.id === id
-        );
+    function showLoading() {
 
-      if (!book) {
-        return;
+      bookList.innerHTML =
+        `
+          <div class="loading-state">
+            本棚を読み込んでいます...
+          </div>
+        `;
+
+    }
+
+
+    /*
+    ==========================================================
+    フォーム
+    ==========================================================
+    */
+
+    noteInput.addEventListener(
+      "input",
+      () => {
+
+        noteCount.textContent =
+          noteInput.value.length;
+
       }
+    );
 
-      editIdInput.value =
-        book.id;
 
-      titleInput.value =
-        book.title;
+    cancelEditButton.addEventListener(
+      "click",
+      resetForm
+    );
 
-      statusInput.value =
-        book.status;
 
-      startDateInput.value =
-        book.startDate || "";
+    function resetForm() {
 
-      endDateInput.value =
-        book.endDate || "";
+      bookForm.reset();
 
-      noteInput.value =
-        book.note || "";
+      editIdInput.value = "";
 
       noteCount.textContent =
-        noteInput.value.length;
+        "0";
 
       formTitle.textContent =
-        "本を編集";
+        "本を登録";
 
       saveButton.textContent =
-        "変更を保存";
+        "本棚に追加";
+
+      saveButton.disabled =
+        false;
 
       cancelEditButton.style.display =
-        "inline-block";
+        "none";
 
-      window.scrollTo({
-        top: 0,
-        behavior: "smooth"
-      });
     }
 
-    function deleteBook(id) {
 
-      const book =
-        books.find(
-          (book) =>
-            book.id === id
-        );
+    /*
+    ==========================================================
+    メッセージ
+    ==========================================================
+    */
 
-      if (!book) {
-        return;
-      }
+    function showLoginError(message) {
 
-      const confirmed =
-        confirm(
-          `「${book.title}」を削除しますか？`
-        );
+      loginError.textContent =
+        message;
 
-      if (!confirmed) {
-        return;
-      }
+      loginError.className =
+        "login-error error";
 
-      books =
-        books.filter(
-          (book) =>
-            book.id !== id
-        );
-
-      saveBooks();
-
-      updateYearFilter();
-      updateSummary();
-      renderBooks();
-
-      if (
-        editIdInput.value === id
-      ) {
-        resetForm();
-      }
     }
+
+
+    function clearLoginError() {
+
+      loginError.textContent =
+        "";
+
+      loginError.className =
+        "login-error";
+
+    }
+
+
+    function showAppMessage(
+      message,
+      type
+    ) {
+
+      appMessage.textContent =
+        message;
+
+      appMessage.className =
+        `app-message ${type}`;
+
+      setTimeout(
+        () => {
+          clearAppMessage();
+        },
+        4000
+      );
+
+    }
+
+
+    function clearAppMessage() {
+
+      appMessage.textContent =
+        "";
+
+      appMessage.className =
+        "app-message";
+
+    }
+
+
+    /*
+    ==========================================================
+    その他
+    ==========================================================
+    */
 
     function formatDate(date) {
 
@@ -1407,12 +2125,15 @@
         year,
         month,
         day
-      ] = date.split("-");
+      ] =
+        date.split("-");
 
       return (
         `${year}/${month}/${day}`
       );
+
     }
+
 
     function escapeHtml(text) {
 
@@ -1425,13 +2146,10 @@
         text || "";
 
       return div.innerHTML;
+
     }
 
-    updateYearFilter();
-    updateSummary();
-    updateTabs();
-    updateTabUI();
-    renderBooks();
   </script>
+
 </body>
 </html>
