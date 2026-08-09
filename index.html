@@ -3,11 +3,25 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>読書管理アプリ</title>
+  <title>わたしの本棚</title>
 
   <style>
     * {
       box-sizing: border-box;
+    }
+
+    :root {
+      --bg: #f5efe6;
+      --paper: #fffdf8;
+      --text: #332b26;
+      --sub-text: #7a6f67;
+      --accent: #7b4f34;
+      --accent-dark: #5f3b27;
+      --wood: #8a5a3b;
+      --wood-dark: #62402c;
+      --border: #ded2c5;
+      --danger: #b84c4c;
+      --shadow: 0 6px 18px rgba(66, 45, 30, 0.12);
     }
 
     body {
@@ -19,289 +33,719 @@
         "Hiragino Kaku Gothic ProN",
         "Yu Gothic",
         sans-serif;
-      background: #f5f5f5;
-      color: #222;
+      background:
+        radial-gradient(circle at top, #fffaf2 0, transparent 420px),
+        var(--bg);
+      color: var(--text);
+    }
+
+    button,
+    input,
+    select,
+    textarea {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
     }
 
     .container {
-      max-width: 900px;
+      width: min(1100px, calc(100% - 32px));
       margin: 0 auto;
-      padding: 24px 16px 60px;
+      padding: 36px 0 70px;
     }
 
-    h1 {
+    .app-header {
       text-align: center;
-      margin-bottom: 30px;
+      margin-bottom: 28px;
     }
 
-    h2 {
-      margin-top: 0;
+    .app-title {
+      margin: 0;
+      font-size: clamp(30px, 5vw, 48px);
+      letter-spacing: 0.08em;
+      font-family: Georgia, "Yu Mincho", "Hiragino Mincho ProN", serif;
     }
 
-    .card {
-      background: #fff;
-      border-radius: 10px;
-      padding: 20px;
+    .app-subtitle {
+      margin: 10px 0 0;
+      color: var(--sub-text);
+      font-size: 14px;
+    }
+
+    .panel {
+      background: rgba(255, 253, 248, 0.94);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+      padding: 22px;
       margin-bottom: 24px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    }
+
+    .panel-title {
+      margin: 0 0 18px;
+      font-size: 20px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1.6fr 1fr 1fr;
+      gap: 16px;
     }
 
     .form-group {
       margin-bottom: 16px;
     }
 
+    .form-group.full {
+      grid-column: 1 / -1;
+    }
+
     label {
       display: block;
-      margin-bottom: 6px;
-      font-weight: bold;
+      margin-bottom: 7px;
+      font-size: 14px;
+      font-weight: 700;
     }
 
     input,
     select,
     textarea {
       width: 100%;
-      padding: 10px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      font-size: 16px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: #fff;
+      color: var(--text);
+      padding: 11px 12px;
+      outline: none;
+      transition: 0.2s;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(123, 79, 52, 0.1);
     }
 
     textarea {
+      min-height: 90px;
       resize: vertical;
-      min-height: 80px;
     }
 
     .counter {
+      margin-top: 5px;
       text-align: right;
-      font-size: 13px;
-      color: #666;
-      margin-top: 4px;
+      color: var(--sub-text);
+      font-size: 12px;
     }
 
-    button {
-      border: none;
-      border-radius: 6px;
-      padding: 10px 18px;
-      font-size: 15px;
-      cursor: pointer;
+    .form-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .primary-button,
+    .secondary-button,
+    .edit-button,
+    .delete-button {
+      border: 0;
+      border-radius: 9px;
+      padding: 10px 16px;
+      transition:
+        transform 0.15s,
+        opacity 0.15s;
+    }
+
+    .primary-button:hover,
+    .secondary-button:hover,
+    .edit-button:hover,
+    .delete-button:hover {
+      transform: translateY(-1px);
     }
 
     .primary-button {
-      background: #333;
-      color: #fff;
-    }
-
-    .delete-button {
-      background: #e74c3c;
+      background: var(--accent);
       color: white;
+      font-weight: 700;
     }
 
-    .edit-button {
-      background: #ddd;
-      color: #222;
+    .secondary-button {
+      display: none;
+      background: #ddd2c7;
+      color: var(--text);
     }
 
-    .filters {
+    .tabs {
       display: flex;
-      gap: 10px;
-      margin-bottom: 20px;
-      flex-wrap: wrap;
+      gap: 8px;
+      padding: 6px;
+      border-radius: 14px;
+      background: #e7ddd2;
+      margin-bottom: 22px;
     }
 
-    .filters select {
-      width: auto;
-      min-width: 160px;
+    .tab-button {
+      flex: 1;
+      border: 0;
+      background: transparent;
+      color: var(--sub-text);
+      border-radius: 10px;
+      padding: 12px 14px;
+      font-weight: 700;
     }
 
-    .book-list {
-      display: grid;
-      gap: 14px;
+    .tab-button.active {
+      background: var(--paper);
+      color: var(--accent-dark);
+      box-shadow: 0 2px 8px rgba(58, 38, 24, 0.08);
     }
 
-    .book-item {
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      padding: 16px;
-    }
-
-    .book-header {
+    .toolbar {
       display: flex;
       justify-content: space-between;
-      gap: 20px;
-      align-items: flex-start;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 18px;
+    }
+
+    .tab-description {
+      color: var(--sub-text);
+      font-size: 14px;
+    }
+
+    .year-filter {
+      width: 160px;
+    }
+
+    .year-filter.hidden {
+      display: none;
+    }
+
+    .bookshelf {
+      position: relative;
+      padding: 24px 22px 42px;
+      border-radius: 14px;
+      overflow: hidden;
+      background:
+        linear-gradient(
+          90deg,
+          rgba(104, 67, 43, 0.08) 1px,
+          transparent 1px
+        ),
+        linear-gradient(180deg, #d1a47d, #b67f58);
+      background-size: 40px 100%, 100% 100%;
+      border: 8px solid var(--wood-dark);
+      box-shadow:
+        inset 0 0 20px rgba(68, 38, 20, 0.22),
+        0 8px 18px rgba(61, 39, 26, 0.14);
+    }
+
+    .bookshelf::before,
+    .bookshelf::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      width: 100%;
+      height: 16px;
+      background: linear-gradient(
+        180deg,
+        #9d6846,
+        var(--wood-dark)
+      );
+      box-shadow: 0 3px 7px rgba(38, 25, 17, 0.25);
+    }
+
+    .bookshelf::before {
+      top: 0;
+    }
+
+    .bookshelf::after {
+      bottom: 0;
+    }
+
+    .book-grid {
+      min-height: 220px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 28px 18px;
+      align-items: end;
+    }
+
+    .book {
+      position: relative;
+      min-height: 210px;
+      border-radius: 5px 9px 9px 5px;
+      padding: 17px 12px 14px;
+      color: white;
+      box-shadow:
+        4px 5px 9px rgba(49, 31, 19, 0.32),
+        inset -5px 0 0 rgba(0, 0, 0, 0.08),
+        inset 4px 0 0 rgba(255, 255, 255, 0.08);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition:
+        transform 0.18s ease,
+        box-shadow 0.18s ease;
+      overflow: hidden;
+    }
+
+    .book:hover {
+      transform: translateY(-7px) rotate(-0.7deg);
+      box-shadow:
+        6px 10px 16px rgba(49, 31, 19, 0.34),
+        inset -5px 0 0 rgba(0, 0, 0, 0.08);
+    }
+
+    .book:nth-child(6n + 1) {
+      background: #6e4a36;
+    }
+
+    .book:nth-child(6n + 2) {
+      background: #47605c;
+    }
+
+    .book:nth-child(6n + 3) {
+      background: #765d3e;
+    }
+
+    .book:nth-child(6n + 4) {
+      background: #5d536b;
+    }
+
+    .book:nth-child(6n + 5) {
+      background: #7a4b4b;
+    }
+
+    .book:nth-child(6n + 6) {
+      background: #4f6175;
+    }
+
+    .book::before {
+      content: "";
+      position: absolute;
+      left: 7px;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: rgba(255, 255, 255, 0.16);
     }
 
     .book-title {
-      font-size: 20px;
-      font-weight: bold;
+      position: relative;
+      z-index: 1;
+      font-family: Georgia, "Yu Mincho", serif;
+      font-weight: 700;
+      line-height: 1.45;
+      font-size: 15px;
+      word-break: break-word;
+    }
+
+    .book-status-label {
+      margin-top: 12px;
+      font-size: 11px;
+      opacity: 0.8;
+    }
+
+    .book-dates {
+      margin-top: 12px;
+      font-size: 11px;
+      line-height: 1.55;
+      opacity: 0.9;
+    }
+
+    .book-actions {
+      display: flex;
+      gap: 6px;
+      margin-top: 13px;
+    }
+
+    .edit-button,
+    .delete-button {
+      flex: 1;
+      padding: 7px 5px;
+      font-size: 11px;
+    }
+
+    .edit-button {
+      background: rgba(255, 255, 255, 0.88);
+      color: #40352e;
+    }
+
+    .delete-button {
+      background: rgba(78, 21, 21, 0.72);
+      color: white;
+    }
+
+    .book-note {
+      margin-top: 10px;
+      font-size: 11px;
+      line-height: 1.5;
+      border-top: 1px solid rgba(255,255,255,0.18);
+      padding-top: 8px;
+      word-break: break-word;
+    }
+
+    .empty-state {
+      grid-column: 1 / -1;
+      min-height: 180px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      color: #5c4636;
+      background: rgba(255, 248, 237, 0.38);
+      border: 1px dashed rgba(92, 70, 54, 0.35);
+      border-radius: 10px;
+    }
+
+    .empty-icon {
+      font-size: 42px;
       margin-bottom: 8px;
     }
 
-    .status {
-      display: inline-block;
-      padding: 4px 10px;
-      border-radius: 20px;
-      font-size: 13px;
-      background: #eee;
-      margin-bottom: 10px;
-    }
-
-    .book-info {
-      margin: 5px 0;
-      line-height: 1.6;
-    }
-
-    .note {
-      white-space: pre-wrap;
-      background: #f7f7f7;
-      padding: 10px;
-      border-radius: 6px;
-      margin-top: 10px;
-    }
-
-    .actions {
+    .summary {
       display: flex;
-      gap: 8px;
-      margin-top: 14px;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
     }
 
-    .empty {
-      text-align: center;
-      color: #777;
-      padding: 30px 0;
+    .summary-card {
+      min-width: 150px;
+      padding: 13px 16px;
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.65);
+      border-radius: 12px;
     }
 
-    @media (max-width: 600px) {
-      .book-header {
-        display: block;
+    .summary-label {
+      color: var(--sub-text);
+      font-size: 12px;
+    }
+
+    .summary-number {
+      margin-top: 2px;
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    @media (max-width: 720px) {
+      .container {
+        width: min(100% - 20px, 1100px);
+        padding-top: 22px;
       }
 
-      .filters {
-        display: block;
+      .form-grid {
+        grid-template-columns: 1fr;
+        gap: 0;
       }
 
-      .filters select {
-        width: 100%;
-        margin-bottom: 8px;
+      .form-group.full {
+        grid-column: auto;
       }
 
-      button {
-        width: 100%;
-      }
-
-      .actions {
+      .toolbar {
+        align-items: stretch;
         flex-direction: column;
+      }
+
+      .year-filter {
+        width: 100%;
+      }
+
+      .book-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 22px 12px;
+      }
+
+      .book {
+        min-height: 195px;
+      }
+
+      .bookshelf {
+        padding-left: 14px;
+        padding-right: 14px;
+      }
+    }
+
+    @media (max-width: 380px) {
+      .book-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .book {
+        padding-left: 10px;
+        padding-right: 10px;
       }
     }
   </style>
 </head>
 
 <body>
-  <div class="container">
+  <main class="container">
 
-    <h1>読書管理</h1>
+    <header class="app-header">
+      <h1 class="app-title">わたしの本棚</h1>
+      <p class="app-subtitle">
+        読みたい本と、読んだ本をシンプルに記録
+      </p>
+    </header>
 
-    <section class="card">
-      <h2>本を登録</h2>
+    <section class="panel">
+      <h2 class="panel-title" id="formTitle">
+        本を登録
+      </h2>
 
       <form id="bookForm">
 
         <input type="hidden" id="editId" />
 
-        <div class="form-group">
-          <label for="title">本のタイトル</label>
-          <input
-            type="text"
-            id="title"
-            placeholder="例：吾輩は猫である"
-            required
-          />
-        </div>
+        <div class="form-grid">
 
-        <div class="form-group">
-          <label for="status">状態</label>
-          <select id="status">
-            <option value="want">読みたい本</option>
-            <option value="read">読んだ本</option>
-          </select>
-        </div>
+          <div class="form-group">
+            <label for="title">
+              本のタイトル
+            </label>
 
-        <div class="form-group">
-          <label for="startDate">読書開始日</label>
-          <input type="date" id="startDate" />
-        </div>
-
-        <div class="form-group">
-          <label for="endDate">読書終了日</label>
-          <input type="date" id="endDate" />
-        </div>
-
-        <div class="form-group">
-          <label for="note">備考・感想（100字以内）</label>
-
-          <textarea
-            id="note"
-            maxlength="100"
-            placeholder="本の感想などを100字以内で入力"
-          ></textarea>
-
-          <div class="counter">
-            <span id="noteCount">0</span> / 100文字
+            <input
+              type="text"
+              id="title"
+              placeholder="例：吾輩は猫である"
+              required
+            />
           </div>
+
+          <div class="form-group">
+            <label for="status">
+              種類
+            </label>
+
+            <select id="status">
+              <option value="want">
+                読みたい本
+              </option>
+
+              <option value="read">
+                読んだ本
+              </option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="startDate">
+              読書開始日
+            </label>
+
+            <input
+              type="date"
+              id="startDate"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="endDate">
+              読書終了日
+            </label>
+
+            <input
+              type="date"
+              id="endDate"
+            />
+          </div>
+
+          <div class="form-group full">
+            <label for="note">
+              備考・感想（100字以内）
+            </label>
+
+            <textarea
+              id="note"
+              maxlength="100"
+              placeholder="本の感想やメモを入力"
+            ></textarea>
+
+            <div class="counter">
+              <span id="noteCount">0</span>
+              / 100文字
+            </div>
+          </div>
+
         </div>
 
-        <button class="primary-button" type="submit">
-          保存
-        </button>
+        <div class="form-actions">
+
+          <button
+            class="primary-button"
+            type="submit"
+            id="saveButton"
+          >
+            本棚に追加
+          </button>
+
+          <button
+            class="secondary-button"
+            type="button"
+            id="cancelEditButton"
+          >
+            編集をキャンセル
+          </button>
+
+        </div>
 
       </form>
     </section>
 
-    <section class="card">
+    <section class="panel">
 
-      <h2>本の一覧</h2>
+      <div class="tabs">
 
-      <div class="filters">
+        <button
+          type="button"
+          class="tab-button active"
+          data-tab="want"
+        >
+          読みたい本
+        </button>
 
-        <select id="statusFilter">
-          <option value="all">すべて</option>
-          <option value="want">読みたい本</option>
-          <option value="read">読んだ本</option>
-        </select>
+        <button
+          type="button"
+          class="tab-button"
+          data-tab="read"
+        >
+          読んだ本
+        </button>
 
-        <select id="yearFilter">
-          <option value="all">すべての年</option>
+      </div>
+
+      <div class="summary">
+
+        <div class="summary-card">
+          <div class="summary-label">
+            読みたい本
+          </div>
+
+          <div
+            class="summary-number"
+            id="wantCount"
+          >
+            0
+          </div>
+        </div>
+
+        <div class="summary-card">
+          <div class="summary-label">
+            読んだ本
+          </div>
+
+          <div
+            class="summary-number"
+            id="readCount"
+          >
+            0
+          </div>
+        </div>
+
+      </div>
+
+      <div class="toolbar">
+
+        <div
+          class="tab-description"
+          id="tabDescription"
+        >
+          これから読みたい本を表示しています。
+        </div>
+
+        <select
+          id="yearFilter"
+          class="year-filter hidden"
+        >
+          <option value="all">
+            すべての年
+          </option>
         </select>
 
       </div>
 
-      <div id="bookList" class="book-list"></div>
+      <div class="bookshelf">
+        <div
+          class="book-grid"
+          id="bookList"
+        ></div>
+      </div>
 
     </section>
 
-  </div>
+  </main>
 
   <script>
     const STORAGE_KEY = "readingBooks";
 
-    const bookForm = document.getElementById("bookForm");
-    const titleInput = document.getElementById("title");
-    const statusInput = document.getElementById("status");
-    const startDateInput = document.getElementById("startDate");
-    const endDateInput = document.getElementById("endDate");
-    const noteInput = document.getElementById("note");
-    const noteCount = document.getElementById("noteCount");
+    const bookForm =
+      document.getElementById("bookForm");
 
-    const editIdInput = document.getElementById("editId");
+    const titleInput =
+      document.getElementById("title");
 
-    const bookList = document.getElementById("bookList");
-    const statusFilter = document.getElementById("statusFilter");
-    const yearFilter = document.getElementById("yearFilter");
+    const statusInput =
+      document.getElementById("status");
+
+    const startDateInput =
+      document.getElementById("startDate");
+
+    const endDateInput =
+      document.getElementById("endDate");
+
+    const noteInput =
+      document.getElementById("note");
+
+    const noteCount =
+      document.getElementById("noteCount");
+
+    const editIdInput =
+      document.getElementById("editId");
+
+    const bookList =
+      document.getElementById("bookList");
+
+    const yearFilter =
+      document.getElementById("yearFilter");
+
+    const tabButtons =
+      document.querySelectorAll(".tab-button");
+
+    const tabDescription =
+      document.getElementById("tabDescription");
+
+    const wantCount =
+      document.getElementById("wantCount");
+
+    const readCount =
+      document.getElementById("readCount");
+
+    const saveButton =
+      document.getElementById("saveButton");
+
+    const cancelEditButton =
+      document.getElementById(
+        "cancelEditButton"
+      );
+
+    const formTitle =
+      document.getElementById("formTitle");
 
     let books = loadBooks();
 
+    let currentTab = "want";
+
     function loadBooks() {
-      const data = localStorage.getItem(STORAGE_KEY);
+      const data =
+        localStorage.getItem(STORAGE_KEY);
 
       if (!data) {
         return [];
@@ -309,7 +753,12 @@
 
       try {
         return JSON.parse(data);
-      } catch {
+      } catch (error) {
+        console.error(
+          "データの読み込みに失敗しました。",
+          error
+        );
+
         return [];
       }
     }
@@ -321,86 +770,55 @@
       );
     }
 
-    noteInput.addEventListener("input", () => {
-      noteCount.textContent = noteInput.value.length;
-    });
-
-    bookForm.addEventListener("submit", (event) => {
-      event.preventDefault();
-
-      const title = titleInput.value.trim();
-      const status = statusInput.value;
-      const startDate = startDateInput.value;
-      const endDate = endDateInput.value;
-      const note = noteInput.value.trim();
-      const editId = editIdInput.value;
-
-      if (!title) {
-        alert("本のタイトルを入力してください。");
-        return;
-      }
-
+    function createId() {
       if (
-        startDate &&
-        endDate &&
-        startDate > endDate
+        window.crypto &&
+        crypto.randomUUID
       ) {
-        alert(
-          "読書終了日は読書開始日以降の日付を指定してください。"
+        return crypto.randomUUID();
+      }
+
+      return (
+        Date.now().toString() +
+        Math.random()
+          .toString(16)
+          .slice(2)
+      );
+    }
+
+    noteInput.addEventListener(
+      "input",
+      () => {
+        noteCount.textContent =
+          noteInput.value.length;
+      }
+    );
+
+    tabButtons.forEach(
+      (button) => {
+        button.addEventListener(
+          "click",
+          () => {
+            currentTab =
+              button.dataset.tab;
+
+            tabButtons.forEach(
+              (tab) => {
+                tab.classList.remove(
+                  "active"
+                );
+              }
+            );
+
+            button.classList.add(
+              "active"
+            );
+
+            updateTabUI();
+            renderBooks();
+          }
         );
-        return;
       }
-
-      if (note.length > 100) {
-        alert("感想は100文字以内で入力してください。");
-        return;
-      }
-
-      if (editId) {
-
-        const index = books.findIndex(
-          (book) => book.id === editId
-        );
-
-        if (index !== -1) {
-          books[index] = {
-            ...books[index],
-            title,
-            status,
-            startDate,
-            endDate,
-            note
-          };
-        }
-
-      } else {
-
-        const book = {
-          id:
-            Date.now().toString() +
-            Math.random().toString(16).slice(2),
-          title,
-          status,
-          startDate,
-          endDate,
-          note,
-          createdAt: new Date().toISOString()
-        };
-
-        books.push(book);
-      }
-
-      saveBooks();
-
-      resetForm();
-
-      updateYearFilter();
-      renderBooks();
-    });
-
-    statusFilter.addEventListener(
-      "change",
-      renderBooks
     );
 
     yearFilter.addEventListener(
@@ -408,10 +826,187 @@
       renderBooks
     );
 
+    bookForm.addEventListener(
+      "submit",
+      (event) => {
+        event.preventDefault();
+
+        const title =
+          titleInput.value.trim();
+
+        const status =
+          statusInput.value;
+
+        const startDate =
+          startDateInput.value;
+
+        const endDate =
+          endDateInput.value;
+
+        const note =
+          noteInput.value.trim();
+
+        const editId =
+          editIdInput.value;
+
+        if (!title) {
+          alert(
+            "本のタイトルを入力してください。"
+          );
+
+          return;
+        }
+
+        if (note.length > 100) {
+          alert(
+            "備考・感想は100文字以内で入力してください。"
+          );
+
+          return;
+        }
+
+        if (
+          startDate &&
+          endDate &&
+          startDate > endDate
+        ) {
+          alert(
+            "読書終了日は読書開始日以降の日付を指定してください。"
+          );
+
+          return;
+        }
+
+        if (
+          status === "read" &&
+          !endDate
+        ) {
+          const proceed =
+            confirm(
+              "読んだ本ですが、読書終了日が入力されていません。このまま保存しますか？"
+            );
+
+          if (!proceed) {
+            return;
+          }
+        }
+
+        if (editId) {
+
+          const index =
+            books.findIndex(
+              (book) =>
+                book.id === editId
+            );
+
+          if (index !== -1) {
+            books[index] = {
+              ...books[index],
+              title,
+              status,
+              startDate,
+              endDate,
+              note,
+              updatedAt:
+                new Date().toISOString()
+            };
+          }
+
+        } else {
+
+          books.push({
+            id: createId(),
+            title,
+            status,
+            startDate,
+            endDate,
+            note,
+            createdAt:
+              new Date().toISOString()
+          });
+
+        }
+
+        saveBooks();
+
+        currentTab = status;
+
+        resetForm();
+        updateTabs();
+        updateYearFilter();
+        updateSummary();
+        updateTabUI();
+        renderBooks();
+      }
+    );
+
+    cancelEditButton.addEventListener(
+      "click",
+      resetForm
+    );
+
     function resetForm() {
       bookForm.reset();
+
       editIdInput.value = "";
+
       noteCount.textContent = "0";
+
+      formTitle.textContent =
+        "本を登録";
+
+      saveButton.textContent =
+        "本棚に追加";
+
+      cancelEditButton.style.display =
+        "none";
+    }
+
+    function updateTabs() {
+      tabButtons.forEach(
+        (button) => {
+          button.classList.toggle(
+            "active",
+            button.dataset.tab ===
+              currentTab
+          );
+        }
+      );
+    }
+
+    function updateTabUI() {
+      if (currentTab === "want") {
+
+        yearFilter.classList.add(
+          "hidden"
+        );
+
+        tabDescription.textContent =
+          "これから読みたい本を表示しています。";
+
+      } else {
+
+        yearFilter.classList.remove(
+          "hidden"
+        );
+
+        tabDescription.textContent =
+          "読み終えた本を、読了した年ごとに確認できます。";
+      }
+    }
+
+    function updateSummary() {
+      wantCount.textContent =
+        books.filter(
+          (book) =>
+            book.status === "want"
+        ).length;
+
+      readCount.textContent =
+        books.filter(
+          (book) =>
+            book.status === "read"
+        ).length;
     }
 
     function updateYearFilter() {
@@ -424,88 +1019,86 @@
           books
             .filter(
               (book) =>
-                book.status === "read" &&
+                book.status ===
+                  "read" &&
                 book.endDate
             )
             .map(
               (book) =>
-                new Date(
-                  book.endDate
-                ).getFullYear()
+                book.endDate.split(
+                  "-"
+                )[0]
             )
         )
-      ].sort((a, b) => b - a);
+      ].sort(
+        (a, b) =>
+          Number(b) -
+          Number(a)
+      );
 
       yearFilter.innerHTML =
-        '<option value="all">すべての年</option>';
+        `
+          <option value="all">
+            すべての年
+          </option>
+        `;
 
-      years.forEach((year) => {
+      years.forEach(
+        (year) => {
+          const option =
+            document.createElement(
+              "option"
+            );
 
-        const option =
-          document.createElement("option");
+          option.value = year;
 
-        option.value = year;
-        option.textContent = `${year}年`;
+          option.textContent =
+            `${year}年`;
 
-        yearFilter.appendChild(option);
+          yearFilter.appendChild(
+            option
+          );
+        }
+      );
 
-      });
-
-      if (
+      const optionExists =
         [...yearFilter.options].some(
           (option) =>
-            option.value === selectedYear
-        )
-      ) {
-        yearFilter.value =
-          selectedYear;
-      }
+            option.value ===
+            selectedYear
+        );
+
+      yearFilter.value =
+        optionExists
+          ? selectedYear
+          : "all";
     }
 
     function renderBooks() {
 
       bookList.innerHTML = "";
 
-      const selectedStatus =
-        statusFilter.value;
-
-      const selectedYear =
-        yearFilter.value;
-
       let filteredBooks =
-        books.filter((book) => {
+        books.filter(
+          (book) =>
+            book.status ===
+            currentTab
+        );
 
-          if (
-            selectedStatus !== "all" &&
-            book.status !== selectedStatus
-          ) {
-            return false;
-          }
-
-          if (selectedYear !== "all") {
-
-            if (
-              book.status !== "read" ||
-              !book.endDate
-            ) {
-              return false;
-            }
-
-            const year =
-              new Date(
-                book.endDate
-              ).getFullYear();
-
-            if (
-              String(year) !==
-              selectedYear
-            ) {
-              return false;
-            }
-          }
-
-          return true;
-        });
+      if (
+        currentTab === "read" &&
+        yearFilter.value !== "all"
+      ) {
+        filteredBooks =
+          filteredBooks.filter(
+            (book) =>
+              book.endDate &&
+              book.endDate.split(
+                "-"
+              )[0] ===
+                yearFilter.value
+          );
+      }
 
       filteredBooks.sort(
         (a, b) => {
@@ -513,16 +1106,17 @@
           const dateA =
             a.endDate ||
             a.startDate ||
-            a.createdAt;
+            a.createdAt ||
+            "";
 
           const dateB =
             b.endDate ||
             b.startDate ||
-            b.createdAt;
+            b.createdAt ||
+            "";
 
-          return (
-            new Date(dateB) -
-            new Date(dateA)
+          return dateB.localeCompare(
+            dateA
           );
         }
       );
@@ -531,8 +1125,36 @@
         filteredBooks.length === 0
       ) {
 
-        bookList.innerHTML =
-          '<div class="empty">登録された本はありません。</div>';
+        const empty =
+          document.createElement(
+            "div"
+          );
+
+        empty.className =
+          "empty-state";
+
+        empty.innerHTML =
+          currentTab === "want"
+            ? `
+              <div class="empty-icon">
+                📚
+              </div>
+              <div>
+                読みたい本はまだありません。
+              </div>
+            `
+            : `
+              <div class="empty-icon">
+                📖
+              </div>
+              <div>
+                読んだ本はまだありません。
+              </div>
+            `;
+
+        bookList.appendChild(
+          empty
+        );
 
         return;
       }
@@ -540,67 +1162,104 @@
       filteredBooks.forEach(
         (book) => {
 
-          const item =
-            document.createElement("div");
+          const bookElement =
+            document.createElement(
+              "article"
+            );
 
-          item.className =
-            "book-item";
+          bookElement.className =
+            "book";
 
           const statusText =
-            book.status === "read"
-              ? "読んだ本"
-              : "読みたい本";
+            book.status === "want"
+              ? "読みたい本"
+              : "読んだ本";
 
-          item.innerHTML = `
-            <div class="book-header">
+          const startText =
+            book.startDate
+              ? formatDate(
+                  book.startDate
+                )
+              : "未設定";
 
-              <div>
+          const endText =
+            book.endDate
+              ? formatDate(
+                  book.endDate
+                )
+              : "未設定";
 
-                <div class="book-title">
-                  ${escapeHtml(book.title)}
-                </div>
+          bookElement.innerHTML = `
+            <div>
 
-                <div class="status">
-                  ${statusText}
-                </div>
-
+              <div class="book-title">
+                ${escapeHtml(
+                  book.title
+                )}
               </div>
 
+              <div class="book-status-label">
+                ${statusText}
+              </div>
+
+              ${
+                book.startDate ||
+                book.endDate
+                  ? `
+                    <div class="book-dates">
+
+                      ${
+                        book.startDate
+                          ? `
+                            開始：
+                            ${startText}
+                            <br>
+                          `
+                          : ""
+                      }
+
+                      ${
+                        book.endDate
+                          ? `
+                            終了：
+                            ${endText}
+                          `
+                          : ""
+                      }
+
+                    </div>
+                  `
+                  : ""
+              }
+
+              ${
+                book.note
+                  ? `
+                    <div class="book-note">
+                      ${escapeHtml(
+                        book.note
+                      )}
+                    </div>
+                  `
+                  : ""
+              }
+
             </div>
 
-            <div class="book-info">
-              <strong>読書開始日：</strong>
-              ${formatDate(book.startDate)}
-            </div>
-
-            <div class="book-info">
-              <strong>読書終了日：</strong>
-              ${formatDate(book.endDate)}
-            </div>
-
-            ${
-              book.note
-                ? `
-                <div class="note">
-                  <strong>備考・感想</strong><br>
-                  ${escapeHtml(book.note)}
-                </div>
-              `
-                : ""
-            }
-
-            <div class="actions">
+            <div class="book-actions">
 
               <button
+                type="button"
                 class="edit-button"
-                onclick="editBook('${book.id}')"
+                data-edit-id="${book.id}"
               >
                 編集
               </button>
 
               <button
+                type="button"
                 class="delete-button"
-                onclick="deleteBook('${book.id}')"
+                data-delete-id="${book.id}"
               >
                 削除
               </button>
@@ -608,16 +1267,54 @@
             </div>
           `;
 
-          bookList.appendChild(item);
+          bookList.appendChild(
+            bookElement
+          );
+        }
+      );
 
-        });
+      document
+        .querySelectorAll(
+          "[data-edit-id]"
+        )
+        .forEach(
+          (button) => {
+            button.addEventListener(
+              "click",
+              () => {
+                editBook(
+                  button.dataset.editId
+                );
+              }
+            );
+          }
+        );
+
+      document
+        .querySelectorAll(
+          "[data-delete-id]"
+        )
+        .forEach(
+          (button) => {
+            button.addEventListener(
+              "click",
+              () => {
+                deleteBook(
+                  button.dataset
+                    .deleteId
+                );
+              }
+            );
+          }
+        );
     }
 
     function editBook(id) {
 
       const book =
         books.find(
-          (book) => book.id === id
+          (book) =>
+            book.id === id
         );
 
       if (!book) {
@@ -645,6 +1342,15 @@
       noteCount.textContent =
         noteInput.value.length;
 
+      formTitle.textContent =
+        "本を編集";
+
+      saveButton.textContent =
+        "変更を保存";
+
+      cancelEditButton.style.display =
+        "inline-block";
+
       window.scrollTo({
         top: 0,
         behavior: "smooth"
@@ -653,51 +1359,79 @@
 
     function deleteBook(id) {
 
-      const result =
-        confirm(
-          "この本を削除しますか？"
+      const book =
+        books.find(
+          (book) =>
+            book.id === id
         );
 
-      if (!result) {
+      if (!book) {
+        return;
+      }
+
+      const confirmed =
+        confirm(
+          `「${book.title}」を削除しますか？`
+        );
+
+      if (!confirmed) {
         return;
       }
 
       books =
         books.filter(
-          (book) => book.id !== id
+          (book) =>
+            book.id !== id
         );
 
       saveBooks();
 
       updateYearFilter();
+      updateSummary();
       renderBooks();
+
+      if (
+        editIdInput.value === id
+      ) {
+        resetForm();
+      }
     }
 
     function formatDate(date) {
 
       if (!date) {
-        return "未設定";
+        return "";
       }
 
-      const [year, month, day] =
-        date.split("-");
+      const [
+        year,
+        month,
+        day
+      ] = date.split("-");
 
-      return `${year}/${month}/${day}`;
+      return (
+        `${year}/${month}/${day}`
+      );
     }
 
     function escapeHtml(text) {
 
       const div =
-        document.createElement("div");
+        document.createElement(
+          "div"
+        );
 
-      div.textContent = text;
+      div.textContent =
+        text || "";
 
       return div.innerHTML;
     }
 
     updateYearFilter();
+    updateSummary();
+    updateTabs();
+    updateTabUI();
     renderBooks();
   </script>
-
 </body>
 </html>
